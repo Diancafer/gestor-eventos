@@ -1,8 +1,12 @@
+// src/services/authService.js
 import db from '../config/db.js';
 import crypto from 'crypto';
 import { hashPassword, comparePassword } from '../utils/password.js';
 import { sendVerificationEmail, sendResetPasswordEmail } from './emailService.js';
 
+// =======================================================
+// REGISTRO DE USUARIO
+// =======================================================
 export async function registerUser({ nombre, apellido, email, password, nombre_empresa }) {
   if (!nombre || !apellido || !email || !password || !nombre_empresa) {
     throw new Error('Todos los campos son requeridos.');
@@ -17,6 +21,7 @@ export async function registerUser({ nombre, apellido, email, password, nombre_e
       throw new Error('El correo electrónico ya está en uso.');
     }
 
+    // Empresa
     let empresa_id;
     const empresaResult = await client.query('SELECT id FROM empresas WHERE nombre_empresa = $1', [nombre_empresa]);
     if (empresaResult.rows.length > 0) {
@@ -29,6 +34,7 @@ export async function registerUser({ nombre, apellido, email, password, nombre_e
       empresa_id = nuevaEmpresaResult.rows[0].id;
     }
 
+    // Rol por defecto
     const defaultRoleResult = await client.query(
       "SELECT id FROM roles WHERE nombre_rol = 'Miembro de Equipo'"
     );
@@ -37,14 +43,15 @@ export async function registerUser({ nombre, apellido, email, password, nombre_e
     }
     const defaultRoleId = defaultRoleResult.rows[0].id;
 
+    // Usuario + perfil
     const passwordHash = await hashPassword(password);
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    const tokenExpiration = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const tokenExpiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
     const newUserResult = await client.query(
-      `INSERT INTO usuarios (email, password_hash, rol_id, empresa_id, token_verificacion, expiracion_token_verificacion)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-      [email, passwordHash, defaultRoleId, empresa_id, verificationToken, tokenExpiration]
+      `INSERT INTO usuarios (email, password_hash, rol_id, empresa_id, correo_verificado, token_verificacion, expiracion_token_verificacion)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+      [email, passwordHash, defaultRoleId, empresa_id, false, verificationToken, tokenExpiration]
     );
     const nuevoUsuarioId = newUserResult.rows[0].id;
 
@@ -54,6 +61,7 @@ export async function registerUser({ nombre, apellido, email, password, nombre_e
     );
 
     await sendVerificationEmail(email, verificationToken);
+
     await client.query('COMMIT');
   } catch (err) {
     await client.query('ROLLBACK');
@@ -63,6 +71,9 @@ export async function registerUser({ nombre, apellido, email, password, nombre_e
   }
 }
 
+// =======================================================
+// VERIFICACIÓN DE CORREO
+// =======================================================
 export async function verifyEmailToken(token) {
   if (!token) throw new Error('Token de verificación requerido.');
 
@@ -71,7 +82,7 @@ export async function verifyEmailToken(token) {
     await client.query('BEGIN');
 
     const result = await client.query(
-      'SELECT id, correo_verificado, expiracion_token_verificacion FROM usuarios WHERE token_verificacion = $1',
+      'SELECT id, email, correo_verificado, expiracion_token_verificacion FROM usuarios WHERE token_verificacion = $1',
       [token]
     );
 
@@ -86,14 +97,21 @@ export async function verifyEmailToken(token) {
       throw new Error('El enlace de verificación ha expirado. Solicita un nuevo enlace.');
     }
 
+    let updatedUser = user;
+
     if (!user.correo_verificado) {
-      await client.query(
-        'UPDATE usuarios SET correo_verificado = TRUE, token_verificacion = NULL, expiracion_token_verificacion = NULL WHERE id = $1',
+      const updateResult = await client.query(
+        `UPDATE usuarios 
+         SET correo_verificado = TRUE, token_verificacion = NULL, expiracion_token_verificacion = NULL 
+         WHERE id = $1 
+         RETURNING id, email, correo_verificado`,
         [user.id]
       );
+      updatedUser = updateResult.rows[0];
     }
 
     await client.query('COMMIT');
+    return updatedUser;
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;
@@ -102,6 +120,9 @@ export async function verifyEmailToken(token) {
   }
 }
 
+// =======================================================
+// LOGIN
+// =======================================================
 export async function loginUser(email, password) {
   if (!email || !password) {
     const err = new Error('Email y contraseña son requeridos.');
@@ -156,6 +177,9 @@ export async function loginUser(email, password) {
   }
 }
 
+// =======================================================
+// RECUPERACIÓN DE CONTRASEÑA
+// =======================================================
 export async function forgotPassword(email) {
   if (!email) throw new Error('El correo electrónico es requerido para recuperar la contraseña.');
 
@@ -169,13 +193,14 @@ export async function forgotPassword(email) {
     );
     const user = result.rows[0];
 
+    // Silencioso: no revela si existe o no; sólo actúa si está verificado
     if (!user || !user.correo_verificado) {
       await client.query('COMMIT');
       return;
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
-    const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
+    const expirationDate = new Date(Date.now() + 60 * 60 * 1000); // 1h
 
     await client.query(
       'UPDATE usuarios SET token_reset_password = $1, expiracion_token_reset = $2 WHERE id = $3',
@@ -236,6 +261,9 @@ export async function resetPassword(token, newPassword) {
   }
 }
 
+// =======================================================
+// SESIÓN
+// =======================================================
 export async function getUserBySession(userId) {
   if (!userId) return null;
 

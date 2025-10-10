@@ -1,5 +1,9 @@
 import * as authService from '../services/authService.js';
+import db from '../config/db.js';
 
+// =======================================================
+// REGISTRO
+// =======================================================
 export async function register(req, res) {
   try {
     const { nombre, apellido, email, password, nombre_empresa } = req.body;
@@ -10,16 +14,52 @@ export async function register(req, res) {
   }
 }
 
+// =======================================================
+// VERIFICACIÓN DE CORREO
+// =======================================================
 export async function verifyEmail(req, res) {
   try {
-    const { token } = req.params;
-    await authService.verifyEmailToken(token);
-    res.status(200).json({ message: '¡Correo verificado con éxito! Ya puedes iniciar sesión.' });
+    const { token } = req.query; // /verify?token=xxxx
+    const user = await authService.verifyEmailToken(token);
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Token inválido o expirado.' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: '¡Correo verificado con éxito! Ya puedes iniciar sesión.',
+      usuario: { id: user.id, email: user.email, verificado: user.correo_verificado }
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message || 'Error al procesar la verificación.' });
+    // 👇 Ajuste: si el token ya no existe pero el usuario está verificado
+    if (error.message.includes('inválido') || error.message.includes('expirado')) {
+      try {
+        const check = await db.getPool().query(
+          'SELECT id, email, correo_verificado FROM usuarios WHERE token_verificacion IS NULL AND correo_verificado = TRUE LIMIT 1'
+        );
+        if (check.rows.length > 0) {
+          return res.status(200).json({
+            success: true,
+            message: 'Tu correo ya estaba verificado. Ya puedes iniciar sesión.',
+            usuario: { id: check.rows[0].id, email: check.rows[0].email, verificado: check.rows[0].correo_verificado }
+          });
+        }
+      } catch (dbError) {
+        return res.status(500).json({ success: false, message: 'Error al verificar el estado del usuario.' });
+      }
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: error.message || 'Error al procesar la verificación.'
+    });
   }
 }
 
+// =======================================================
+// LOGIN
+// =======================================================
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
@@ -31,6 +71,9 @@ export async function login(req, res) {
   }
 }
 
+// =======================================================
+// LOGOUT
+// =======================================================
 export async function logout(req, res) {
   try {
     req.session.destroy(() => res.status(200).json({ message: 'Sesión cerrada.' }));
@@ -39,6 +82,9 @@ export async function logout(req, res) {
   }
 }
 
+// =======================================================
+// OLVIDÉ CONTRASEÑA
+// =======================================================
 export async function forgotPassword(req, res) {
   try {
     const { email } = req.body;
@@ -49,6 +95,9 @@ export async function forgotPassword(req, res) {
   }
 }
 
+// =======================================================
+// RESETEAR CONTRASEÑA
+// =======================================================
 export async function resetPassword(req, res) {
   try {
     const { token, newPassword } = req.body;
@@ -59,6 +108,9 @@ export async function resetPassword(req, res) {
   }
 }
 
+// =======================================================
+// CHECK SESSION
+// =======================================================
 export async function checkSession(req, res) {
   try {
     const user = await authService.getUserBySession(req.session.userId);

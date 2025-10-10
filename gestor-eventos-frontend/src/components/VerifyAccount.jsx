@@ -8,20 +8,15 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { Message } from 'primereact/message';
 import { Button } from 'primereact/button';
 
-// Asegura que las peticiones manejen la sesión (aunque no es estrictamente necesario aquí)
 axios.defaults.withCredentials = true;
 
 const VerifyAccount = () => {
-    // Hooks para leer la URL y navegar
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     
-    // Estados para manejar la interfaz: 'verifying', 'success', 'error'
     const [status, setStatus] = useState('verifying'); 
     const [message, setMessage] = useState('');
     
-    // Obtener el token de la URL (?token=XYZ123)
-    // NOTA: El backend usa el endpoint '/verificar-email' y el frontend usa el componente VerifyAccount
     const token = searchParams.get('token');
 
     useEffect(() => {
@@ -33,27 +28,23 @@ const VerifyAccount = () => {
 
         const verifyToken = async () => {
             try {
-                // LLAMADA A LA API DEL BACKEND: Usando el endpoint 'verificar-email' que está en tu backend
-                const response = await axios.get(`http://localhost:3000/api/auth/verificar-email?token=${token}`);
+                const response = await axios.get(`http://localhost:3000/api/auth/verify?token=${token}`);
                 
                 setStatus('success');
                 setMessage(response.data.message || '¡Cuenta verificada con éxito! Ya puedes iniciar sesión.');
                 
-                // Redirigir al Login después de 3 segundos
                 setTimeout(() => {
                     navigate('/login');
                 }, 3000);
 
             } catch (err) {
                 setStatus('error');
-                // Captura el mensaje de error que envía el backend (e.g., "enlace expirado")
                 setMessage(err.response?.data?.message || 'Error al verificar. El enlace puede haber expirado o ser inválido.');
             }
         };
 
         verifyToken();
     }, [token, navigate]);
-
 
     const renderContent = () => {
         if (status === 'verifying') {
@@ -76,8 +67,8 @@ const VerifyAccount = () => {
                     />
                 </div>
             );
-        } else { // status === 'error'
-             return (
+        } else {
+            return (
                 <div className="text-center p-5">
                     <Message severity="error" text={message} className="mb-3 w-full" />
                     <Link to="/login">

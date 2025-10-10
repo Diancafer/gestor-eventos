@@ -9,47 +9,41 @@ import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 import { Divider } from 'primereact/divider';
 
-// Importamos el hook del contexto de autenticación
+// Hook del contexto de autenticación
 import { useAuth } from '../context/AuthContext.jsx'; 
 
-// Configuración global crucial: asegura que Axios envíe las cookies de sesión
+// Configuración global: asegura que Axios maneje cookies de sesión
 axios.defaults.withCredentials = true;
 
 const Login = () => {
-    // CORRECCIÓN: Si el Login no está envuelto en AuthProvider, useAuth fallará aquí.
     const { login } = useAuth(); 
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [successMessage, setSuccessMessage] = useState(null);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
-        setSuccessMessage(null);
 
         try {
-            // Petición POST al endpoint de login del backend
             const response = await axios.post(
                 'http://localhost:3000/api/auth/login',
                 { email, password }
             );
 
-            // 1. Llama a la función 'login' del contexto para actualizar el estado global
+            // Actualiza el contexto global
             login(response.data.usuario);   
             
-            // 2. Redirección al Dashboard
+            // Redirige al Dashboard
             navigate('/dashboard'); 
 
         } catch (err) {
-            // Manejar errores
             const msg = err.response?.data?.message || 'Error de conexión o credenciales inválidas.';
             setError(msg);
-
         } finally {
             setLoading(false);
         }
@@ -66,7 +60,6 @@ const Login = () => {
                 <form onSubmit={handleSubmit} className="p-fluid">
                     
                     {error && <Message severity="error" text={error} className="mb-3" />}
-                    {successMessage && <Message severity="success" text={successMessage} className="mb-3" />}
 
                     {/* Campo Email */}
                     <div className="field mb-3">
@@ -98,7 +91,7 @@ const Login = () => {
                         </span>
                     </div>
 
-                    {/* ENLACE DE RECUPERACIÓN DE CONTRASEÑA */}
+                    {/* Enlace de recuperación */}
                     <div className="text-right mb-4">
                         <Link to="/forgot-password" className="text-sm text-primary hover:underline">
                             ¿Olvidaste tu contraseña?
@@ -119,7 +112,6 @@ const Login = () => {
                 </Divider>
 
                 <div className="text-center">
-                    {/* Enlace al componente Register */}
                     <Link to="/register" className="text-primary hover:underline">
                         ¿No tienes cuenta? Regístrate aquí
                     </Link>
