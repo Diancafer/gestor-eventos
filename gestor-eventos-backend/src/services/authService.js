@@ -1,4 +1,3 @@
-// src/services/authService.js
 import db from '../config/db.js';
 import crypto from 'crypto';
 import { hashPassword, comparePassword } from '../utils/password.js';
@@ -7,9 +6,11 @@ import { sendVerificationEmail, sendResetPasswordEmail } from './emailService.js
 // =======================================================
 // REGISTRO DE USUARIO
 // =======================================================
-export async function registerUser({ nombre, apellido, email, password, nombre_empresa }) {
-  if (!nombre || !apellido || !email || !password || !nombre_empresa) {
-    throw new Error('Todos los campos son requeridos.');
+export async function registerUser({ nombre, apellido, email, password, nombre_empresa, rol_id }) {
+  rol_id = Number(rol_id);
+
+  if (!nombre || !apellido || !email || !password || !nombre_empresa || isNaN(rol_id)) {
+    throw new Error('Todos los campos son requeridos, incluyendo un rol válido.');
   }
 
   const client = await db.getPool().connect();
@@ -34,14 +35,11 @@ export async function registerUser({ nombre, apellido, email, password, nombre_e
       empresa_id = nuevaEmpresaResult.rows[0].id;
     }
 
-    // Rol por defecto
-    const defaultRoleResult = await client.query(
-      "SELECT id FROM roles WHERE nombre_rol = 'Miembro de Equipo'"
-    );
-    if (defaultRoleResult.rows.length === 0) {
-      throw new Error("Error de configuración: El rol 'Miembro de Equipo' no existe.");
+    // Validar rol
+    const rolResult = await client.query('SELECT id FROM roles WHERE id = $1', [rol_id]);
+    if (rolResult.rows.length === 0) {
+      throw new Error('El rol proporcionado no existe.');
     }
-    const defaultRoleId = defaultRoleResult.rows[0].id;
 
     // Usuario + perfil
     const passwordHash = await hashPassword(password);
@@ -49,9 +47,11 @@ export async function registerUser({ nombre, apellido, email, password, nombre_e
     const tokenExpiration = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
     const newUserResult = await client.query(
-      `INSERT INTO usuarios (email, password_hash, rol_id, empresa_id, correo_verificado, token_verificacion, expiracion_token_verificacion)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
-      [email, passwordHash, defaultRoleId, empresa_id, false, verificationToken, tokenExpiration]
+      `INSERT INTO usuarios (
+        email, password_hash, rol_id, empresa_id,
+        correo_verificado, token_verificacion, expiracion_token_verificacion
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+      [email, passwordHash, rol_id, empresa_id, false, verificationToken, tokenExpiration]
     );
     const nuevoUsuarioId = newUserResult.rows[0].id;
 
@@ -138,7 +138,8 @@ export async function loginUser(email, password) {
           u.password_hash, 
           u.correo_verificado, 
           p.nombre, 
-          r.nombre_rol 
+          r.nombre_rol, 
+          r.id AS rol_id
        FROM usuarios u
        JOIN perfiles p ON u.id = p.usuario_id
        JOIN roles r ON u.rol_id = r.id
@@ -170,7 +171,9 @@ export async function loginUser(email, password) {
       id: user.id,
       nombre: user.nombre,
       email,
-      nombre_rol: user.nombre_rol
+      rol_id: user.rol_id,
+      rol_nombre: user.nombre_rol,
+      correo_verificado: user.correo_verificado
     };
   } finally {
     client.release();
@@ -193,7 +196,6 @@ export async function forgotPassword(email) {
     );
     const user = result.rows[0];
 
-    // Silencioso: no revela si existe o no; sólo actúa si está verificado
     if (!user || !user.correo_verificado) {
       await client.query('COMMIT');
       return;
@@ -260,11 +262,10 @@ export async function resetPassword(token, newPassword) {
     client.release();
   }
 }
-
 // =======================================================
-// SESIÓN
+// OBTENER USUARIO POR ID (para sesión y perfil)
 // =======================================================
-export async function getUserBySession(userId) {
+export async function getUserById(userId) {
   if (!userId) return null;
 
   const client = await db.getPool().connect();
@@ -274,7 +275,8 @@ export async function getUserBySession(userId) {
           u.id, 
           p.nombre, 
           u.email, 
-          r.nombre_rol 
+          r.nombre_rol,
+          r.id AS rol_id
        FROM usuarios u
        JOIN perfiles p ON u.id = p.usuario_id
        JOIN roles r ON u.rol_id = r.id
@@ -289,8 +291,11 @@ export async function getUserBySession(userId) {
       id: user.id,
       nombre: user.nombre,
       email: user.email,
-      nombre_rol: user.nombre_rol
+      rol_id: user.rol_id,
+      rol_nombre: user.nombre_rol
     };
+  } catch (err) {
+    throw err;
   } finally {
     client.release();
   }

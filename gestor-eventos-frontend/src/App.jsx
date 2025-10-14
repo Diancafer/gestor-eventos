@@ -30,14 +30,14 @@ const Dashboard = () => {
 };
 
 // --- Componente para Proteger Rutas ---
-const RutaProtegida = ({ element: Element }) => {
+const RutaProtegida = ({ element }) => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return <div className="text-center p-5">Verificando sesión...</div>; 
   }
-  
-  return isAuthenticated ? <Element /> : <Navigate to="/login" replace />;
+
+  return isAuthenticated ? element : <Navigate to="/login" replace />;
 };
 
 function App() {
@@ -56,7 +56,7 @@ function App() {
           {/* Ruta Protegida */}
           <Route 
             path="/dashboard" 
-            element={<RutaProtegida element={Dashboard} />} 
+            element={<RutaProtegida element={<Dashboard />} />} 
           />
           
           {/* Ruta de Comodín (404) */}

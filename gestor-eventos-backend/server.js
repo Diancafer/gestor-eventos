@@ -5,7 +5,7 @@ import session from 'express-session';
 import pgSession from 'connect-pg-simple';
 import db from './src/config/db.js'; 
 
-// Importar rutas
+
 import authRoutes from './src/routes/auth.routes.js'; 
 
 dotenv.config();

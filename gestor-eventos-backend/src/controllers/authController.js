@@ -1,4 +1,5 @@
 import * as authService from '../services/authService.js';
+import { createSession, getSession, destroy } from '../utils/Session.js';
 import db from '../config/db.js';
 
 // =======================================================
@@ -6,8 +7,8 @@ import db from '../config/db.js';
 // =======================================================
 export async function register(req, res) {
   try {
-    const { nombre, apellido, email, password, nombre_empresa } = req.body;
-    await authService.registerUser({ nombre, apellido, email, password, nombre_empresa });
+    const { nombre, apellido, email, password, nombre_empresa, rol_id } = req.body;
+    await authService.registerUser({ nombre, apellido, email, password, nombre_empresa, rol_id });
     res.status(201).json({ message: '¡Registro exitoso! Revisa tu correo para verificar tu cuenta.' });
   } catch (error) {
     res.status(500).json({ message: error.message || 'Error interno del servidor.' });
@@ -19,7 +20,7 @@ export async function register(req, res) {
 // =======================================================
 export async function verifyEmail(req, res) {
   try {
-    const { token } = req.query; // /verify?token=xxxx
+    const { token } = req.query;
     const user = await authService.verifyEmailToken(token);
 
     if (!user) {
@@ -32,7 +33,6 @@ export async function verifyEmail(req, res) {
       usuario: { id: user.id, email: user.email, verificado: user.correo_verificado }
     });
   } catch (error) {
-    // 👇 Ajuste: si el token ya no existe pero el usuario está verificado
     if (error.message.includes('inválido') || error.message.includes('expirado')) {
       try {
         const check = await db.getPool().query(
@@ -63,10 +63,36 @@ export async function verifyEmail(req, res) {
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
+    console.log('Intentando login con:', email);
+
     const user = await authService.loginUser(email, password);
-    req.session.userId = user.id;
-    res.status(200).json({ message: 'Inicio de sesión exitoso.', usuario: user });
+    console.log('Usuario encontrado:', user);
+
+    if (!user.correo_verificado) {
+      return res.status(403).json({ message: 'Debes verificar tu correo antes de iniciar sesión.' });
+    }
+
+    const token = await createSession(user);
+    console.log('Token generado:', token);
+
+    // Envia cookie al navegador
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: false,        // true si usás HTTPS
+      sameSite: 'Lax'
+    });
+
+    res.status(200).json({
+      message: 'Inicio de sesión exitoso.',
+      token,
+      usuario: {
+        id: user.id,
+        email: user.email,
+        rol: user.rol_id
+      }
+    });
   } catch (error) {
+    console.error('Error en login:', error);
     res.status(error.statusCode || 500).json({ message: error.message || 'Error interno del servidor.' });
   }
 }
@@ -76,7 +102,12 @@ export async function login(req, res) {
 // =======================================================
 export async function logout(req, res) {
   try {
-    req.session.destroy(() => res.status(200).json({ message: 'Sesión cerrada.' }));
+    const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
+    if (token) destroy(token);
+
+    // ✅ Eliminar cookie del navegador
+    res.clearCookie('token');
+    res.status(200).json({ message: 'Sesión cerrada.' });
   } catch {
     res.status(500).json({ message: 'No se pudo cerrar la sesión.' });
   }
@@ -113,10 +144,39 @@ export async function resetPassword(req, res) {
 // =======================================================
 export async function checkSession(req, res) {
   try {
-    const user = await authService.getUserBySession(req.session.userId);
+    const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ logueado: false });
+
+    const session = getSession(token);
+    if (!session) return res.status(401).json({ logueado: false });
+
+    const user = await authService.getUserById(session.userId);
     if (!user) return res.status(401).json({ logueado: false });
+
     res.status(200).json({ logueado: true, usuario: user });
   } catch {
     res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+}
+
+// =======================================================
+// PERFIL DEL USUARIO ACTUAL
+// =======================================================
+export async function getProfile(req, res) {
+  try {
+    const { userId, rol } = req.user;
+    const user = await authService.getUserById(userId);
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
+
+    res.status(200).json({
+      logueado: true,
+      usuario: {
+        id: user.id,
+        email: user.email,
+        rol: rol
+      }
+    });
+  } catch {
+    res.status(500).json({ message: 'Error al obtener el perfil.' });
   }
 }
