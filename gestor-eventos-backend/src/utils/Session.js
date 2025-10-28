@@ -1,7 +1,8 @@
+// src/utils/Session.js
 import jwt from 'jsonwebtoken';
 import db from '../config/db.js';
 import { v4 as uuidv4 } from 'uuid';
-import client from '../services/redisClient.js';
+import { getRedisClient } from '../services/redisClient.js';
 
 const SECRET = process.env.SESSION_SECRET || 'clave_secreta_por_defecto';
 const EXPIRATION = '2h';
@@ -44,12 +45,9 @@ export function getSession(token) {
 // VERIFICAR SI EL TOKEN ESTÁ REVOCADO
 // =======================================================
 export async function isBlacklisted(jti) {
-  return new Promise((resolve, reject) => {
-    client.get(jti, (err, result) => {
-      if (err) return reject(err);
-      resolve(result === 'revoked');
-    });
-  });
+  const client = await getRedisClient();
+  const result = await client.get(jti);
+  return result === 'revoked';
 }
 
 // =======================================================
@@ -76,7 +74,8 @@ export async function destroy(token) {
     const jti = decoded.jti || token;
     const ttl = decoded.exp - Math.floor(Date.now() / 1000);
 
-    client.setex(jti, ttl, 'revoked');
+    const client = await getRedisClient();
+    await client.setEx(jti, ttl, 'revoked');
   } catch {
     // no hacer nada si el token no se puede decodificar
   }

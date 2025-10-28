@@ -1,6 +1,22 @@
-const redis = require('redis');
-const client = redis.createClient({ host: '127.0.0.1', port: 6379 });
+// src/services/redisClient.js
+import { createClient } from 'redis';
 
-client.on('error', err => console.error('Redis error:', err));
+const client = createClient({
+  socket: {
+    host: '127.0.0.1',
+    port: 6379
+  }
+});
 
-module.exports = client;
+client.on('error', (err) => console.error('Redis error:', err));
+
+let isConnected = false;
+
+export async function getRedisClient() {
+  if (!isConnected) {
+    await client.connect();
+    isConnected = true;
+    console.log('Redis conectado');
+  }
+  return client;
+}

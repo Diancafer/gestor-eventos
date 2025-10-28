@@ -1,7 +1,9 @@
+// index.js
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import authRoutes from './src/routes/auth.routes.js';
+import { getRedisClient } from './src/services/redisClient.js';
 
 dotenv.config();
 
@@ -25,7 +27,16 @@ app.get('/', (req, res) => {
   res.send('Backend activo y escuchando');
 });
 
-// Inicio del servidor
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
+// Conexión a Redis al iniciar
+getRedisClient()
+  .then(() => {
+    console.log('Redis conectado');
+    // Inicio del servidor
+    app.listen(PORT, () => {
+      console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('❌ Error al conectar Redis:', err);
+    process.exit(1); // opcional: detener si Redis falla
+  });
