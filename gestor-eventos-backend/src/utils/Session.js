@@ -1,11 +1,10 @@
 import jwt from 'jsonwebtoken';
 import db from '../config/db.js';
+import { v4 as uuidv4 } from 'uuid';
+import client from '../services/redisClient.js';
 
 const SECRET = process.env.SESSION_SECRET || 'clave_secreta_por_defecto';
-const EXPIRATION = '2h'; // Puedes ajustar la duración del token
-
-// Blacklist en memoria (puedes migrar a Redis o DB si lo necesitas)
-const blacklist = new Set();
+const EXPIRATION = '2h';
 
 // =======================================================
 // CREAR TOKEN DE SESIÓN
@@ -13,15 +12,16 @@ const blacklist = new Set();
 export async function createSession(user) {
   let rol = user.rol_id;
 
-  // Si no tienes el nombre del rol, lo buscas
   if (!user.rol_nombre && user.rol_id) {
-    const result = await db.query('SELECT nombre FROM roles WHERE id = $1', [user.rol_id]);
-    rol = result.rows[0]?.nombre || 'SinRol';
+    const result = await db.query('SELECT nombre_rol FROM roles WHERE id = $1', [user.rol_id]);
+    rol = result.rows[0]?.nombre_rol || 'SinRol';
   }
 
+  const jti = uuidv4();
   const payload = {
     userId: user.id,
-    rol
+    rol,
+    jti
   };
 
   const token = jwt.sign(payload, SECRET, { expiresIn: EXPIRATION });
@@ -33,22 +33,35 @@ export async function createSession(user) {
 // =======================================================
 export function getSession(token) {
   try {
-    if (isBlacklisted(token)) return null;
     const decoded = jwt.verify(token, SECRET);
-    return decoded; // { userId, rol }
+    return decoded; // { userId, rol, jti }
   } catch {
     return null;
   }
 }
 
 // =======================================================
-// VERIFICAR SI EL TOKEN ES VÁLIDO
+// VERIFICAR SI EL TOKEN ESTÁ REVOCADO
 // =======================================================
-export function sessionExist(token) {
+export async function isBlacklisted(jti) {
+  return new Promise((resolve, reject) => {
+    client.get(jti, (err, result) => {
+      if (err) return reject(err);
+      resolve(result === 'revoked');
+    });
+  });
+}
+
+// =======================================================
+// VERIFICAR SI EL TOKEN ES VÁLIDO Y NO REVOCADO
+// =======================================================
+export async function sessionExist(token) {
   try {
-    if (isBlacklisted(token)) return false;
     const decoded = jwt.verify(token, SECRET);
-    return !!decoded;
+    const jti = decoded.jti || token;
+
+    const revoked = await isBlacklisted(jti);
+    return !revoked;
   } catch {
     return false;
   }
@@ -57,13 +70,14 @@ export function sessionExist(token) {
 // =======================================================
 // INVALIDAR TOKEN (REVOCAR SESIÓN)
 // =======================================================
-export function destroy(token) {
-  blacklist.add(token);
-}
+export async function destroy(token) {
+  try {
+    const decoded = jwt.decode(token);
+    const jti = decoded.jti || token;
+    const ttl = decoded.exp - Math.floor(Date.now() / 1000);
 
-// =======================================================
-// VERIFICAR SI UN TOKEN ESTÁ REVOCADO
-// =======================================================
-export function isBlacklisted(token) {
-  return blacklist.has(token);
+    client.setex(jti, ttl, 'revoked');
+  } catch {
+    // no hacer nada si el token no se puede decodificar
+  }
 }

@@ -20,11 +20,11 @@ const pool = new pg.Pool({
 // Función de prueba de conexión al iniciar
 pool.connect()
     .then(client => {
-        console.log('✅ Conexión exitosa a PostgreSQL!');
+        console.log(' Conexión exitosa a PostgreSQL!');
         client.release();
     })
     .catch(err => {
-        console.error('❌ Error fatal al conectar a PostgreSQL. Verifique su base de datos y credenciales:', err.message);
+        console.error(' Error fatal al conectar a PostgreSQL. Verifique su base de datos y credenciales:', err.message);
     });
 
 // Objeto para manejar las queries y exponer el pool

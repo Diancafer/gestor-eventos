@@ -58,7 +58,7 @@ const ResetPassword = () => {
         try {
             // 2. Enviar el token y la nueva contraseña en el cuerpo de la petición (JSON)
             const response = await axios.post(`${BASE_URL}/reset-password`, {
-                // 🛑 CRUCIAL: El nombre de la clave debe ser exactamente 'token' y 'newPassword'
+                //  El nombre de la clave debe ser exactamente 'token' y 'newPassword'
                 token: token,
                 newPassword: newPassword,
             }, {

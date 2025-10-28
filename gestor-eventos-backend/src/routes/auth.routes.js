@@ -46,7 +46,6 @@ router.get('/roles', async (req, res) => {
       select: { id: true, nombre_rol: true }
     });
 
-    
     const formateados = roles.map((rol) => ({
       id: rol.id,
       nombre: rol.nombre_rol

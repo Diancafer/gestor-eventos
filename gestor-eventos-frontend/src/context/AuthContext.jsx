@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     setUser(null);
     setIsAuthenticated(false);
-    setLoading(false); // 🔓 desbloquea la app
+    setLoading(false); // desbloquea la app
   };
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       if (!token) {
         resetAuthState();
-        return setLoading(false); // 🔓 evita bloqueo si no hay token
+        return setLoading(false); // evita bloqueo si no hay token
       }
 
       try {
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
       } catch {
         resetAuthState();
       } finally {
-        setLoading(false); // 🔓 asegura que loading termine
+        setLoading(false); // asegura que loading termine
       }
     };
 

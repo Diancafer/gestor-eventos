@@ -63,22 +63,17 @@ export async function verifyEmail(req, res) {
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
-    console.log('Intentando login con:', email);
-
     const user = await authService.loginUser(email, password);
-    console.log('Usuario encontrado:', user);
 
     if (!user.correo_verificado) {
       return res.status(403).json({ message: 'Debes verificar tu correo antes de iniciar sesión.' });
     }
 
     const token = await createSession(user);
-    console.log('Token generado:', token);
 
-    // Envia cookie al navegador
     res.cookie('token', token, {
       httpOnly: true,
-      secure: false,        // true si usás HTTPS
+      secure: false,
       sameSite: 'Lax'
     });
 
@@ -92,7 +87,6 @@ export async function login(req, res) {
       }
     });
   } catch (error) {
-    console.error('Error en login:', error);
     res.status(error.statusCode || 500).json({ message: error.message || 'Error interno del servidor.' });
   }
 }
@@ -103,11 +97,11 @@ export async function login(req, res) {
 export async function logout(req, res) {
   try {
     const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
-    if (token) destroy(token);
+    if (!token) return res.status(400).json({ message: 'Token no encontrado.' });
 
-    // ✅ Eliminar cookie del navegador
+    await destroy(token); // ✅ ahora es async y revoca en Redis
     res.clearCookie('token');
-    res.status(200).json({ message: 'Sesión cerrada.' });
+    res.status(200).json({ message: 'Sesión cerrada correctamente.' });
   } catch {
     res.status(500).json({ message: 'No se pudo cerrar la sesión.' });
   }
