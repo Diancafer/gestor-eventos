@@ -675,6 +675,3 @@ ALTER TABLE ONLY public.usuarios
 --
 -- PostgreSQL database dump complete
 --
-
-\unrestrict G3Of2VyRdD56rKuAngqKt2jYJyxELmqi2uVPE1KJCMpwafq5VW5ngIxqE7gYfcq
-
