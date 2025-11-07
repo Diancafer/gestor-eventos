@@ -3,10 +3,10 @@ import dotenv from 'dotenv';
 import cors from 'cors'; 
 import session from 'express-session';
 import pgSession from 'connect-pg-simple';
-import db from './src/config/db.js'; 
+import db from './src/config/db.js';
 
-
-import authRoutes from './src/routes/auth.routes.js'; 
+import authRoutes from './src/routes/auth.routes.js';
+import metodoRoutes from './src/routes/metodo.routes.js'; // IMPORTACIÓN FALTANTE
 
 dotenv.config();
 
@@ -17,8 +17,8 @@ const PORT = process.env.PORT || 3000;
 // CONFIGURACIÓN DE CORS
 // =======================================================
 const corsOptions = {
-  origin: 'http://localhost:5185', // puerto real de tu frontend
-  credentials: true,               // permite cookies
+  origin: 'http://localhost:5185',
+  credentials: true,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: 'Content-Type,Authorization',
 };
@@ -47,7 +47,7 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === 'production', 
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
-      maxAge: 24 * 60 * 60 * 1000, // 24 horas
+      maxAge: 24 * 60 * 60 * 1000,
     },
   })
 );
@@ -56,9 +56,14 @@ app.use(
 // RUTAS
 // =======================================================
 app.use('/api/auth', authRoutes);
+app.use('/api', metodoRoutes); //MONTAJE DEL ROUTER DE MÉTODOS
 
 app.get('/', (req, res) => {
   res.send('API de Gestor de Eventos corriendo.');
+});
+
+app.post('/api/test', (req, res) => {
+  res.json({ mensaje: 'Ruta /api/test activa' });
 });
 
 // =======================================================

@@ -1,8 +1,8 @@
-// index.js
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import authRoutes from './src/routes/auth.routes.js';
+import metodoRoutes from './src/routes/metodo.routes.js';
 import { getRedisClient } from './src/services/redisClient.js';
 
 dotenv.config();
@@ -21,22 +21,25 @@ app.use(express.json());
 
 // Rutas principales
 app.use('/api/auth', authRoutes);
+app.use('/api', metodoRoutes); // INTEGRACIÓN DEL OBJETO DE NEGOCIO
 
 // Ruta de prueba
 app.get('/', (req, res) => {
   res.send('Backend activo y escuchando');
 });
 
-// Conexión a Redis al iniciar
-getRedisClient()
-  .then(() => {
+// Inicio del servidor y conexión a Redis
+(async () => {
+  try {
+    console.log('Intentando conectar a Redis...');
+    await getRedisClient();
     console.log('Redis conectado');
-    // Inicio del servidor
+
     app.listen(PORT, () => {
-      console.log(`Servidor corriendo en http://localhost:${PORT}`);
+      console.log(` Servidor Express corriendo en http://localhost:${PORT}`);
     });
-  })
-  .catch((err) => {
-    console.error('❌ Error al conectar Redis:', err);
+  } catch (err) {
+    console.error('Error al conectar Redis:', err);
     process.exit(1); // opcional: detener si Redis falla
-  });
+  }
+})();

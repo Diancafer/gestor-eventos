@@ -1,4 +1,3 @@
-// src/services/redisClient.js
 import { createClient } from 'redis';
 
 const client = createClient({
@@ -8,15 +7,22 @@ const client = createClient({
   }
 });
 
-client.on('error', (err) => console.error('Redis error:', err));
+client.on('error', (err) => {
+  console.error('Redis error:', err);
+});
 
 let isConnected = false;
 
 export async function getRedisClient() {
   if (!isConnected) {
-    await client.connect();
-    isConnected = true;
-    console.log('Redis conectado');
+    console.log('🔌 Intentando conectar a Redis...');
+    try {
+      await client.connect();
+      isConnected = true;
+      console.log('Redis conectado');
+    } catch (error) {
+      console.error('Error al conectar con Redis:', error);
+    }
   }
   return client;
 }
