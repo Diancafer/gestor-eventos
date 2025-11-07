@@ -2,12 +2,12 @@
 -- PostgreSQL database dump
 --
 
-\restrict G3Of2VyRdD56rKuAngqKt2jYJyxELmqi2uVPE1KJCMpwafq5VW5ngIxqE7gYfcq
+\restrict sm1gznhGYdzhow6VQqaNPyQ7RSXXbjlOWMx9lYtrr6bCM1oLzNOMfAMOXSOWM6I
 
 -- Dumped from database version 18.0
 -- Dumped by pg_dump version 18.0
 
--- Started on 2025-10-20 22:22:12
+-- Started on 2025-11-06 23:37:09
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -55,7 +55,7 @@ CREATE SEQUENCE public.empresas_id_seq
 ALTER SEQUENCE public.empresas_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5092 (class 0 OID 0)
+-- TOC entry 5173 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: empresas_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -100,12 +100,136 @@ CREATE SEQUENCE public.eventos_id_seq
 ALTER SEQUENCE public.eventos_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5093 (class 0 OID 0)
+-- TOC entry 5174 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: eventos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.eventos_id_seq OWNED BY public.eventos.id;
+
+
+--
+-- TOC entry 242 (class 1259 OID 16862)
+-- Name: gastos; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.gastos (
+    id integer NOT NULL,
+    usuario_id integer,
+    descripcion text NOT NULL,
+    monto numeric(12,2) NOT NULL,
+    fecha timestamp without time zone DEFAULT now(),
+    evento_id integer
+);
+
+
+ALTER TABLE public.gastos OWNER TO postgres;
+
+--
+-- TOC entry 241 (class 1259 OID 16861)
+-- Name: gastos_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.gastos_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.gastos_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5175 (class 0 OID 0)
+-- Dependencies: 241
+-- Name: gastos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.gastos_id_seq OWNED BY public.gastos.id;
+
+
+--
+-- TOC entry 233 (class 1259 OID 16682)
+-- Name: metodos; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.metodos (
+    id integer NOT NULL,
+    nombre character varying(100) NOT NULL,
+    descripcion text
+);
+
+
+ALTER TABLE public.metodos OWNER TO postgres;
+
+--
+-- TOC entry 232 (class 1259 OID 16681)
+-- Name: metodos_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.metodos_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.metodos_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5176 (class 0 OID 0)
+-- Dependencies: 232
+-- Name: metodos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.metodos_id_seq OWNED BY public.metodos.id;
+
+
+--
+-- TOC entry 240 (class 1259 OID 16839)
+-- Name: pagos; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.pagos (
+    id integer NOT NULL,
+    usuario_id integer NOT NULL,
+    monto numeric(12,2) NOT NULL,
+    referencia character varying(100) NOT NULL,
+    fecha_pago timestamp without time zone DEFAULT now(),
+    evento_id integer,
+    estado character varying(20) DEFAULT 'procesado'::character varying
+);
+
+
+ALTER TABLE public.pagos OWNER TO postgres;
+
+--
+-- TOC entry 239 (class 1259 OID 16838)
+-- Name: pagos_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.pagos_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.pagos_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5177 (class 0 OID 0)
+-- Dependencies: 239
+-- Name: pagos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.pagos_id_seq OWNED BY public.pagos.id;
 
 
 --
@@ -121,6 +245,46 @@ CREATE TABLE public.perfiles (
 
 
 ALTER TABLE public.perfiles OWNER TO postgres;
+
+--
+-- TOC entry 235 (class 1259 OID 16695)
+-- Name: permisos; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.permisos (
+    id integer NOT NULL,
+    rol_id integer NOT NULL,
+    metodo_id integer NOT NULL,
+    permitido boolean DEFAULT true
+);
+
+
+ALTER TABLE public.permisos OWNER TO postgres;
+
+--
+-- TOC entry 234 (class 1259 OID 16694)
+-- Name: permisos_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.permisos_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.permisos_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5178 (class 0 OID 0)
+-- Dependencies: 234
+-- Name: permisos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.permisos_id_seq OWNED BY public.permisos.id;
+
 
 --
 -- TOC entry 224 (class 1259 OID 16532)
@@ -154,7 +318,7 @@ CREATE SEQUENCE public.registros_eventos_id_seq
 ALTER SEQUENCE public.registros_eventos_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5094 (class 0 OID 0)
+-- TOC entry 5179 (class 0 OID 0)
 -- Dependencies: 225
 -- Name: registros_eventos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -192,7 +356,7 @@ CREATE SEQUENCE public.roles_id_seq
 ALTER SEQUENCE public.roles_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5095 (class 0 OID 0)
+-- TOC entry 5180 (class 0 OID 0)
 -- Dependencies: 227
 -- Name: roles_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -213,6 +377,61 @@ CREATE TABLE public.sessiones (
 
 
 ALTER TABLE public.sessiones OWNER TO postgres;
+
+--
+-- TOC entry 237 (class 1259 OID 16778)
+-- Name: tx; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tx (
+    id integer NOT NULL,
+    usuario_id integer NOT NULL,
+    metodo_id integer NOT NULL,
+    fecha timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    estado character varying(50) DEFAULT 'pendiente'::character varying,
+    detalle text
+);
+
+
+ALTER TABLE public.tx OWNER TO postgres;
+
+--
+-- TOC entry 236 (class 1259 OID 16777)
+-- Name: tx_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.tx_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.tx_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5181 (class 0 OID 0)
+-- Dependencies: 236
+-- Name: tx_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.tx_id_seq OWNED BY public.tx.id;
+
+
+--
+-- TOC entry 238 (class 1259 OID 16801)
+-- Name: tx_metodos; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tx_metodos (
+    tx_id integer NOT NULL,
+    metodo_id integer NOT NULL
+);
+
+
+ALTER TABLE public.tx_metodos OWNER TO postgres;
 
 --
 -- TOC entry 229 (class 1259 OID 16554)
@@ -266,7 +485,7 @@ CREATE SEQUENCE public.usuarios_id_seq
 ALTER SEQUENCE public.usuarios_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5096 (class 0 OID 0)
+-- TOC entry 5182 (class 0 OID 0)
 -- Dependencies: 231
 -- Name: usuarios_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -275,7 +494,7 @@ ALTER SEQUENCE public.usuarios_id_seq OWNED BY public.usuarios.id;
 
 
 --
--- TOC entry 4888 (class 2604 OID 16572)
+-- TOC entry 4917 (class 2604 OID 16572)
 -- Name: empresas id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -283,7 +502,7 @@ ALTER TABLE ONLY public.empresas ALTER COLUMN id SET DEFAULT nextval('public.emp
 
 
 --
--- TOC entry 4889 (class 2604 OID 16573)
+-- TOC entry 4918 (class 2604 OID 16573)
 -- Name: eventos id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -291,7 +510,39 @@ ALTER TABLE ONLY public.eventos ALTER COLUMN id SET DEFAULT nextval('public.even
 
 
 --
--- TOC entry 4892 (class 2604 OID 16574)
+-- TOC entry 4935 (class 2604 OID 16865)
+-- Name: gastos id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.gastos ALTER COLUMN id SET DEFAULT nextval('public.gastos_id_seq'::regclass);
+
+
+--
+-- TOC entry 4926 (class 2604 OID 16685)
+-- Name: metodos id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.metodos ALTER COLUMN id SET DEFAULT nextval('public.metodos_id_seq'::regclass);
+
+
+--
+-- TOC entry 4932 (class 2604 OID 16842)
+-- Name: pagos id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pagos ALTER COLUMN id SET DEFAULT nextval('public.pagos_id_seq'::regclass);
+
+
+--
+-- TOC entry 4927 (class 2604 OID 16698)
+-- Name: permisos id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.permisos ALTER COLUMN id SET DEFAULT nextval('public.permisos_id_seq'::regclass);
+
+
+--
+-- TOC entry 4921 (class 2604 OID 16574)
 -- Name: registros_eventos id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -299,7 +550,7 @@ ALTER TABLE ONLY public.registros_eventos ALTER COLUMN id SET DEFAULT nextval('p
 
 
 --
--- TOC entry 4894 (class 2604 OID 16575)
+-- TOC entry 4923 (class 2604 OID 16575)
 -- Name: roles id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -307,7 +558,15 @@ ALTER TABLE ONLY public.roles ALTER COLUMN id SET DEFAULT nextval('public.roles_
 
 
 --
--- TOC entry 4895 (class 2604 OID 16576)
+-- TOC entry 4929 (class 2604 OID 16781)
+-- Name: tx id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tx ALTER COLUMN id SET DEFAULT nextval('public.tx_id_seq'::regclass);
+
+
+--
+-- TOC entry 4924 (class 2604 OID 16576)
 -- Name: usuarios id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -315,7 +574,7 @@ ALTER TABLE ONLY public.usuarios ALTER COLUMN id SET DEFAULT nextval('public.usu
 
 
 --
--- TOC entry 5074 (class 0 OID 16509)
+-- TOC entry 5144 (class 0 OID 16509)
 -- Dependencies: 219
 -- Data for Name: empresas; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -337,21 +596,63 @@ COPY public.empresas (id, nombre_empresa) FROM stdin;
 16	empresa
 17	Empresa 23
 18	empresa25
+19	admin
 \.
 
 
 --
--- TOC entry 5076 (class 0 OID 16515)
+-- TOC entry 5146 (class 0 OID 16515)
 -- Dependencies: 221
 -- Data for Name: eventos; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.eventos (id, titulo, descripcion, fecha_inicio, fecha_fin, ubicacion, capacidad, organizador_id, estado) FROM stdin;
+1	Foro Ambiental	Debate sobre gestión de residuos	2025-11-10 09:00:00+00	2025-11-10 12:00:00+00	Auditorio Central	100	29	activo
 \.
 
 
 --
--- TOC entry 5078 (class 0 OID 16528)
+-- TOC entry 5167 (class 0 OID 16862)
+-- Dependencies: 242
+-- Data for Name: gastos; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.gastos (id, usuario_id, descripcion, monto, fecha, evento_id) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5158 (class 0 OID 16682)
+-- Dependencies: 233
+-- Data for Name: metodos; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.metodos (id, nombre, descripcion) FROM stdin;
+1	crear_evento	Permite al organizador crear eventos
+2	pagar	Permite al usuario realizar pagos
+3	visualizar_eventos	Permite ver eventos disponibles
+4	visualizar_pagos	Permite ver pagos realizados
+5	reservar_lugar	Permite reservar lugar en un evento
+6	visualizar_reportes	Permite ver reportes financieros y de asistencia
+7	asignar_roles	Permite asignar roles al personal
+8	contratar_personal	Permite contratar personal para eventos
+9	registrar_gastos	Permite registrar gastos del evento
+10	registrar_asistencia	Permite registrar asistencia de personas
+\.
+
+
+--
+-- TOC entry 5165 (class 0 OID 16839)
+-- Dependencies: 240
+-- Data for Name: pagos; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.pagos (id, usuario_id, monto, referencia, fecha_pago, evento_id, estado) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5148 (class 0 OID 16528)
 -- Dependencies: 223
 -- Data for Name: perfiles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -382,11 +683,45 @@ COPY public.perfiles (usuario_id, nombre, apellido) FROM stdin;
 23	pruebaa	prueba
 24	Prueba	Prueba 2
 25	pruebaa	priebaaa
+26	jose	jose
+27	prubaaa	krjew
+28	miguel	hernandez
+29	admin	admin
 \.
 
 
 --
--- TOC entry 5079 (class 0 OID 16532)
+-- TOC entry 5160 (class 0 OID 16695)
+-- Dependencies: 235
+-- Data for Name: permisos; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.permisos (id, rol_id, metodo_id, permitido) FROM stdin;
+1	1	1	t
+2	1	2	t
+3	1	3	t
+4	1	4	t
+5	1	5	t
+6	1	6	t
+7	1	7	t
+8	1	8	t
+9	1	9	t
+10	1	10	t
+11	5	4	t
+12	5	6	t
+13	5	9	t
+14	6	1	t
+15	6	7	t
+16	6	8	t
+17	6	10	t
+18	7	2	t
+19	7	3	t
+20	7	5	t
+\.
+
+
+--
+-- TOC entry 5149 (class 0 OID 16532)
 -- Dependencies: 224
 -- Data for Name: registros_eventos; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -396,7 +731,7 @@ COPY public.registros_eventos (id, evento_id, usuario_id, fecha_registro) FROM s
 
 
 --
--- TOC entry 5081 (class 0 OID 16540)
+-- TOC entry 5151 (class 0 OID 16540)
 -- Dependencies: 226
 -- Data for Name: roles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -410,7 +745,7 @@ COPY public.roles (id, nombre_rol) FROM stdin;
 
 
 --
--- TOC entry 5083 (class 0 OID 16546)
+-- TOC entry 5153 (class 0 OID 16546)
 -- Dependencies: 228
 -- Data for Name: sessiones; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -421,7 +756,28 @@ Q49QV6YTPd7PqSQEVXyBvQgnCjlKG4wM	{"cookie":{"originalMaxAge":604800000,"expires"
 
 
 --
--- TOC entry 5084 (class 0 OID 16554)
+-- TOC entry 5162 (class 0 OID 16778)
+-- Dependencies: 237
+-- Data for Name: tx; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.tx (id, usuario_id, metodo_id, fecha, estado, detalle) FROM stdin;
+1	29	1	2025-11-07 02:52:36.687689	exitoso	\N
+\.
+
+
+--
+-- TOC entry 5163 (class 0 OID 16801)
+-- Dependencies: 238
+-- Data for Name: tx_metodos; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.tx_metodos (tx_id, metodo_id) FROM stdin;
+\.
+
+
+--
+-- TOC entry 5154 (class 0 OID 16554)
 -- Dependencies: 229
 -- Data for Name: user_sessions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -431,13 +787,14 @@ COPY public.user_sessions (sid, sess, expire) FROM stdin;
 
 
 --
--- TOC entry 5085 (class 0 OID 16562)
+-- TOC entry 5155 (class 0 OID 16562)
 -- Dependencies: 230
 -- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.usuarios (id, email, password_hash, rol_id, correo_verificado, token_verificacion, expiracion_token_verificacion, token_reset_password, expiracion_token_reset, empresa_id) FROM stdin;
 21	usuario@ejemplo.com	$2b$10$KDs5Z7UCZcElsd9OPRnjKeilBJAEhm2AGtNvsil/maNF7V2F0O1dK	7	t	\N	\N	\N	\N	15
+29	admin@test.com	$2b$10$.Cm.Cbn1tWfNkpKtFsF3qO1orBVf49rtR/tX/o.ryzygTo/SwgeKe	1	t	\N	\N	\N	\N	19
 19	moran@test.com	$2b$10$RucdhWSSGCdBvtwpsT8js.18rZCvRyc3KXbdbyAgXFKHkGpeFjORm	7	t	\N	\N	\N	\N	13
 1	diana.final@eventos.com	$2b$10$XplAnOJe3pWriIuPoT1dy.wfPHwPuXROPycg367aU9l2N7FkNXF7G	7	t	fe904eefc2dd3249854e5e9c22bf78f498c142ea00d52badd266194ea2d34e6d	2025-10-06 00:52:51.135	\N	\N	\N
 2	hola@hola.com	$2b$10$Z1zl2M3j2Jem34zZ9HlOsuWz8zeTQdK0AF5lTzpOON2YRgjUf.jCu	7	t	\N	\N	\N	\N	\N
@@ -462,29 +819,68 @@ COPY public.usuarios (id, email, password_hash, rol_id, correo_verificado, token
 23	prueba2@test.com	$2b$10$v2CyG5OIY86z3A5rBIZnoegwz4r3nmBXyQXRCdQoltyX7O0SKiZyC	7	t	\N	\N	\N	\N	3
 24	Prueba10@test.com	$2b$10$Z/U3FnOmGLZyguE3my9kBuKGzCPyDAld9aLM1ju8inM7OeRZxPXse	7	t	\N	\N	\N	\N	17
 25	prueba25@test.com	$2b$10$EG43ERVoRcWd2b3/qUsseuev09baVMquFP5yGF.NHNDjp64WEQcp6	1	t	\N	\N	\N	\N	18
+27	prueba12@test.com	$2b$10$s5Z2XiKoq319qOTaYauC5.PkVrxrH3CDN/XLPuHgVIUy5kjMADy6u	7	t	\N	\N	\N	\N	3
+26	prueba60@test.com	$2b$10$WAhFgZ6W8FRv3NG/A/URo.ea4j4qTBjsMvGN7V0fRPSTLT/24sneG	7	t	\N	\N	\N	\N	2
+28	prueba222@test.com	$2b$10$/sTsKRGN6FP.xaK2MqAFdeQUHi3BgXqCkoH9zYz5ffbtwcB3eAsOC	7	t	\N	\N	\N	\N	10
 \.
 
 
 --
--- TOC entry 5097 (class 0 OID 0)
+-- TOC entry 5183 (class 0 OID 0)
 -- Dependencies: 220
 -- Name: empresas_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.empresas_id_seq', 18, true);
+SELECT pg_catalog.setval('public.empresas_id_seq', 19, true);
 
 
 --
--- TOC entry 5098 (class 0 OID 0)
+-- TOC entry 5184 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: eventos_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.eventos_id_seq', 1, false);
+SELECT pg_catalog.setval('public.eventos_id_seq', 1, true);
 
 
 --
--- TOC entry 5099 (class 0 OID 0)
+-- TOC entry 5185 (class 0 OID 0)
+-- Dependencies: 241
+-- Name: gastos_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.gastos_id_seq', 1, false);
+
+
+--
+-- TOC entry 5186 (class 0 OID 0)
+-- Dependencies: 232
+-- Name: metodos_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.metodos_id_seq', 10, true);
+
+
+--
+-- TOC entry 5187 (class 0 OID 0)
+-- Dependencies: 239
+-- Name: pagos_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.pagos_id_seq', 1, false);
+
+
+--
+-- TOC entry 5188 (class 0 OID 0)
+-- Dependencies: 234
+-- Name: permisos_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.permisos_id_seq', 20, true);
+
+
+--
+-- TOC entry 5189 (class 0 OID 0)
 -- Dependencies: 225
 -- Name: registros_eventos_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -493,7 +889,7 @@ SELECT pg_catalog.setval('public.registros_eventos_id_seq', 1, false);
 
 
 --
--- TOC entry 5100 (class 0 OID 0)
+-- TOC entry 5190 (class 0 OID 0)
 -- Dependencies: 227
 -- Name: roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
@@ -502,16 +898,25 @@ SELECT pg_catalog.setval('public.roles_id_seq', 7, true);
 
 
 --
--- TOC entry 5101 (class 0 OID 0)
+-- TOC entry 5191 (class 0 OID 0)
+-- Dependencies: 236
+-- Name: tx_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.tx_id_seq', 1, true);
+
+
+--
+-- TOC entry 5192 (class 0 OID 0)
 -- Dependencies: 231
 -- Name: usuarios_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.usuarios_id_seq', 25, true);
+SELECT pg_catalog.setval('public.usuarios_id_seq', 29, true);
 
 
 --
--- TOC entry 4898 (class 2606 OID 16578)
+-- TOC entry 4938 (class 2606 OID 16578)
 -- Name: empresas empresas_nombre_empresa_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -520,7 +925,7 @@ ALTER TABLE ONLY public.empresas
 
 
 --
--- TOC entry 4900 (class 2606 OID 16580)
+-- TOC entry 4940 (class 2606 OID 16580)
 -- Name: empresas empresas_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -529,7 +934,7 @@ ALTER TABLE ONLY public.empresas
 
 
 --
--- TOC entry 4902 (class 2606 OID 16582)
+-- TOC entry 4942 (class 2606 OID 16582)
 -- Name: eventos eventos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -538,7 +943,43 @@ ALTER TABLE ONLY public.eventos
 
 
 --
--- TOC entry 4904 (class 2606 OID 16584)
+-- TOC entry 4982 (class 2606 OID 16873)
+-- Name: gastos gastos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.gastos
+    ADD CONSTRAINT gastos_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4965 (class 2606 OID 16693)
+-- Name: metodos metodos_nombre_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.metodos
+    ADD CONSTRAINT metodos_nombre_key UNIQUE (nombre);
+
+
+--
+-- TOC entry 4967 (class 2606 OID 16691)
+-- Name: metodos metodos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.metodos
+    ADD CONSTRAINT metodos_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4980 (class 2606 OID 16850)
+-- Name: pagos pagos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pagos
+    ADD CONSTRAINT pagos_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4944 (class 2606 OID 16584)
 -- Name: perfiles perfiles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -547,7 +988,16 @@ ALTER TABLE ONLY public.perfiles
 
 
 --
--- TOC entry 4906 (class 2606 OID 16586)
+-- TOC entry 4970 (class 2606 OID 16704)
+-- Name: permisos permisos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.permisos
+    ADD CONSTRAINT permisos_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4946 (class 2606 OID 16586)
 -- Name: registros_eventos registros_eventos_evento_id_usuario_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -556,7 +1006,7 @@ ALTER TABLE ONLY public.registros_eventos
 
 
 --
--- TOC entry 4908 (class 2606 OID 16588)
+-- TOC entry 4948 (class 2606 OID 16588)
 -- Name: registros_eventos registros_eventos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -565,7 +1015,7 @@ ALTER TABLE ONLY public.registros_eventos
 
 
 --
--- TOC entry 4910 (class 2606 OID 16590)
+-- TOC entry 4950 (class 2606 OID 16590)
 -- Name: roles roles_nombre_rol_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -574,7 +1024,7 @@ ALTER TABLE ONLY public.roles
 
 
 --
--- TOC entry 4912 (class 2606 OID 16592)
+-- TOC entry 4952 (class 2606 OID 16592)
 -- Name: roles roles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -583,7 +1033,7 @@ ALTER TABLE ONLY public.roles
 
 
 --
--- TOC entry 4915 (class 2606 OID 16594)
+-- TOC entry 4955 (class 2606 OID 16594)
 -- Name: sessiones sessiones_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -592,7 +1042,25 @@ ALTER TABLE ONLY public.sessiones
 
 
 --
--- TOC entry 4918 (class 2606 OID 16596)
+-- TOC entry 4978 (class 2606 OID 16807)
+-- Name: tx_metodos tx_metodos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tx_metodos
+    ADD CONSTRAINT tx_metodos_pkey PRIMARY KEY (tx_id, metodo_id);
+
+
+--
+-- TOC entry 4975 (class 2606 OID 16790)
+-- Name: tx tx_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tx
+    ADD CONSTRAINT tx_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4958 (class 2606 OID 16596)
 -- Name: user_sessions user_sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -601,7 +1069,7 @@ ALTER TABLE ONLY public.user_sessions
 
 
 --
--- TOC entry 4920 (class 2606 OID 16598)
+-- TOC entry 4960 (class 2606 OID 16598)
 -- Name: usuarios usuarios_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -610,7 +1078,7 @@ ALTER TABLE ONLY public.usuarios
 
 
 --
--- TOC entry 4922 (class 2606 OID 16600)
+-- TOC entry 4962 (class 2606 OID 16600)
 -- Name: usuarios usuarios_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -619,7 +1087,7 @@ ALTER TABLE ONLY public.usuarios
 
 
 --
--- TOC entry 4916 (class 1259 OID 16601)
+-- TOC entry 4956 (class 1259 OID 16601)
 -- Name: IDX_session_expire; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -627,7 +1095,23 @@ CREATE INDEX "IDX_session_expire" ON public.user_sessions USING btree (expire);
 
 
 --
--- TOC entry 4913 (class 1259 OID 16602)
+-- TOC entry 4963 (class 1259 OID 16837)
+-- Name: idx_metodos_nombre; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_metodos_nombre ON public.metodos USING btree (nombre);
+
+
+--
+-- TOC entry 4968 (class 1259 OID 16715)
+-- Name: idx_permisos_rol_metodo; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_permisos_rol_metodo ON public.permisos USING btree (rol_id, metodo_id);
+
+
+--
+-- TOC entry 4953 (class 1259 OID 16602)
 -- Name: idx_sessiones_expire; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -635,7 +1119,75 @@ CREATE INDEX idx_sessiones_expire ON public.sessiones USING btree (expire);
 
 
 --
--- TOC entry 4923 (class 2606 OID 16603)
+-- TOC entry 4971 (class 1259 OID 16835)
+-- Name: idx_tx_estado; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_tx_estado ON public.tx USING btree (estado);
+
+
+--
+-- TOC entry 4972 (class 1259 OID 16834)
+-- Name: idx_tx_metodo; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_tx_metodo ON public.tx USING btree (metodo_id);
+
+
+--
+-- TOC entry 4976 (class 1259 OID 16836)
+-- Name: idx_tx_metodos_tx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_tx_metodos_tx ON public.tx_metodos USING btree (tx_id);
+
+
+--
+-- TOC entry 4973 (class 1259 OID 16833)
+-- Name: idx_tx_usuario; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_tx_usuario ON public.tx USING btree (usuario_id);
+
+
+--
+-- TOC entry 4995 (class 2606 OID 16879)
+-- Name: gastos gastos_evento_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.gastos
+    ADD CONSTRAINT gastos_evento_id_fkey FOREIGN KEY (evento_id) REFERENCES public.eventos(id);
+
+
+--
+-- TOC entry 4996 (class 2606 OID 16874)
+-- Name: gastos gastos_usuario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.gastos
+    ADD CONSTRAINT gastos_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id);
+
+
+--
+-- TOC entry 4993 (class 2606 OID 16856)
+-- Name: pagos pagos_evento_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pagos
+    ADD CONSTRAINT pagos_evento_id_fkey FOREIGN KEY (evento_id) REFERENCES public.eventos(id);
+
+
+--
+-- TOC entry 4994 (class 2606 OID 16851)
+-- Name: pagos pagos_usuario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pagos
+    ADD CONSTRAINT pagos_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id);
+
+
+--
+-- TOC entry 4983 (class 2606 OID 16603)
 -- Name: perfiles perfiles_usuario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -644,7 +1196,25 @@ ALTER TABLE ONLY public.perfiles
 
 
 --
--- TOC entry 4924 (class 2606 OID 16608)
+-- TOC entry 4987 (class 2606 OID 16710)
+-- Name: permisos permisos_metodo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.permisos
+    ADD CONSTRAINT permisos_metodo_id_fkey FOREIGN KEY (metodo_id) REFERENCES public.metodos(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4988 (class 2606 OID 16705)
+-- Name: permisos permisos_rol_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.permisos
+    ADD CONSTRAINT permisos_rol_id_fkey FOREIGN KEY (rol_id) REFERENCES public.roles(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4984 (class 2606 OID 16608)
 -- Name: registros_eventos registros_eventos_evento_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -653,7 +1223,43 @@ ALTER TABLE ONLY public.registros_eventos
 
 
 --
--- TOC entry 4925 (class 2606 OID 16613)
+-- TOC entry 4989 (class 2606 OID 16796)
+-- Name: tx tx_metodo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tx
+    ADD CONSTRAINT tx_metodo_id_fkey FOREIGN KEY (metodo_id) REFERENCES public.metodos(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4991 (class 2606 OID 16813)
+-- Name: tx_metodos tx_metodos_metodo_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tx_metodos
+    ADD CONSTRAINT tx_metodos_metodo_id_fkey FOREIGN KEY (metodo_id) REFERENCES public.metodos(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4992 (class 2606 OID 16808)
+-- Name: tx_metodos tx_metodos_tx_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tx_metodos
+    ADD CONSTRAINT tx_metodos_tx_id_fkey FOREIGN KEY (tx_id) REFERENCES public.tx(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4990 (class 2606 OID 16791)
+-- Name: tx tx_usuario_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tx
+    ADD CONSTRAINT tx_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4985 (class 2606 OID 16613)
 -- Name: usuarios usuarios_empresa_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -662,7 +1268,7 @@ ALTER TABLE ONLY public.usuarios
 
 
 --
--- TOC entry 4926 (class 2606 OID 16618)
+-- TOC entry 4986 (class 2606 OID 16618)
 -- Name: usuarios usuarios_rol_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -670,8 +1276,11 @@ ALTER TABLE ONLY public.usuarios
     ADD CONSTRAINT usuarios_rol_id_fkey FOREIGN KEY (rol_id) REFERENCES public.roles(id);
 
 
--- Completed on 2025-10-20 22:22:12
+-- Completed on 2025-11-06 23:37:10
 
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict sm1gznhGYdzhow6VQqaNPyQ7RSXXbjlOWMx9lYtrr6bCM1oLzNOMfAMOXSOWM6I
+
