@@ -1,8 +1,12 @@
 import db from '../../config/db.js';
+import queries from '../../config/queries.json' with { type: 'json' };
 
 export async function registrarTransaccion(usuarioId, nombreMetodo, estado, detalle = null) {
   try {
-    const metodo = await db.query('SELECT id FROM metodos WHERE nombre = $1', [nombreMetodo]);
+    const metodo = await db.query(
+      queries.metodos.getIdByName, // <-- Actualizado
+      [nombreMetodo]
+    );
     const metodoId = metodo.rows[0]?.id;
 
     if (!metodoId) {
@@ -11,8 +15,7 @@ export async function registrarTransaccion(usuarioId, nombreMetodo, estado, deta
     }
 
     await db.query(
-      `INSERT INTO tx (usuario_id, metodo_id, fecha, estado, detalle)
-       VALUES ($1, $2, NOW(), $3, $4)`,
+      queries.transacciones.insert, // <-- Actualizado
       [usuarioId, metodoId, estado, detalle]
     );
   } catch (error) {

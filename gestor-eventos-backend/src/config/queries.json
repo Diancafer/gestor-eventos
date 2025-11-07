@@ -1,0 +1,16 @@
+{
+  "permisos": {
+    "loadAll": "SELECT rol_id, nombre FROM metodos INNER JOIN permisos ON permisos.metodo_id = metodos.id WHERE permitido = true",
+    "getPermisoDirecto": "SELECT permitido FROM permisos WHERE rol_id = $1 AND metodo_id = $2"
+  },
+  "metodos": {
+    "getByName": "SELECT id, nombre FROM metodos WHERE nombre = $1",
+    "getIdByName": "SELECT id FROM metodos WHERE nombre = $1"
+  },
+  "usuarios": {
+    "getRolById": "SELECT rol_id FROM usuarios WHERE id = $1"
+  },
+  "transacciones": {
+    "insert": "INSERT INTO tx (usuario_id, metodo_id, fecha, estado, detalle) VALUES ($1, $2, NOW(), $3, $4)"
+  }
+}
