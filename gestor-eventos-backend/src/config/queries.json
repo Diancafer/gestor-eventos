@@ -1,16 +1,20 @@
 {
-  "permisos": {
-    "loadAll": "SELECT rol_id, nombre FROM metodos INNER JOIN permisos ON permisos.metodo_id = metodos.id WHERE permitido = true",
-    "getPermisoDirecto": "SELECT permitido FROM permisos WHERE rol_id = $1 AND metodo_id = $2"
-  },
-  "metodos": {
-    "getByName": "SELECT id, nombre FROM metodos WHERE nombre = $1",
-    "getIdByName": "SELECT id FROM metodos WHERE nombre = $1"
-  },
-  "usuarios": {
-    "getRolById": "SELECT rol_id FROM usuarios WHERE id = $1"
-  },
-  "transacciones": {
-    "insert": "INSERT INTO tx (usuario_id, metodo_id, fecha, estado, detalle) VALUES ($1, $2, NOW(), $3, $4)"
-  }
+  "loadAllPermissions": "SELECT p.rol_id, t.llave FROM permisos p JOIN tx t ON p.transaccion_id = t.id WHERE p.permitido = true",
+  "getRolId": "SELECT rol_id FROM usuarios WHERE id = $1",
+  "getPermisoPorLlave": "SELECT p.permitido FROM permisos p JOIN tx t ON p.transaccion_id = t.id WHERE p.rol_id = $1 AND t.llave = $2",
+  "getTransaccionIdPorLlave": "SELECT id FROM tx WHERE llave = $1",
+  "getMetodoIdPorNombre": "SELECT id FROM metodos WHERE nombre = $1",
+  "insertTxLog": "INSERT INTO tx_ejecuciones (usuario_id, llave, tx_id, metodo_id, estado, detalle, fecha) VALUES ($1, $2, $3, $4, $5, $6, NOW())",
+  "insertPago": "INSERT INTO pagos (monto, referencia, usuario_id) VALUES ($1, $2, $3) RETURNING id",
+  "selectEventosActivos": "SELECT id, titulo, descripcion, fecha_inicio, fecha_fin, ubicacion, capacidad, estado FROM eventos WHERE estado != $1",
+  "selectPagosPorUsuario": "SELECT id, monto, referencia FROM pagos WHERE usuario_id = $1",
+  "insertEvento": "INSERT INTO eventos (titulo, descripcion, fecha_inicio, fecha_fin, ubicacion, capacidad, organizador_id, estado) VALUES ($1, $2, $3, $4, $5, $6, $7, 'activo') RETURNING id",
+  "selectEventoPorId": "SELECT capacidad FROM eventos WHERE id = $1",
+  "selectRegistroEvento": "SELECT id FROM registros_eventos WHERE evento_id = $1 AND usuario_id = $2",
+  "insertRegistroEvento": "INSERT INTO registros_eventos (evento_id, usuario_id, fecha_registro) VALUES ($1, $2, NOW())",
+  "selectTxLogPorUsuario": "SELECT fecha, estado, llave, detalle FROM tx_ejecuciones WHERE usuario_id = $1 AND fecha BETWEEN $2 AND $3 ORDER BY fecha DESC",
+  "updateRolUsuario": "UPDATE usuarios SET rol_id = $1 WHERE id = $2 RETURNING id",
+  "insertUsuario": "INSERT INTO usuarios (email, rol_id, empresa_id) VALUES ($1, $2, $3) RETURNING id",
+  "insertPerfil": "INSERT INTO perfiles (usuario_id, nombre, apellido) VALUES ($1, $2, $3)",
+  "insertGasto": "INSERT INTO gastos (usuario_id, descripcion, monto, evento_id) VALUES ($1, $2, $3, $4) RETURNING id"
 }

@@ -1,104 +1,36 @@
 import db from '../../config/db.js';
-import queries from '../../config/queries.json' with { type: 'json' };
+import { getQuery } from '../../utils/queryLoader.js';
 
 const permissionMap = new Map();
 
-/**
- * Carga todos los permisos en memoria para alto rendimiento
- */
 export async function loadAllPermissions() {
-  const res = await db.query(queries.permisos.loadAll); // <-- Actualizado
-  
+  const query = getQuery('loadAllPermissions');
+  const res = await db.query(query);
   permissionMap.clear();
   for (const row of res.rows) {
-    const key = `${row.rol_id}-${row.nombre.toLowerCase()}`;
+    const key = `${row.rol_id}-${row.llave.toLowerCase()}`;
     permissionMap.set(key, true);
   }
 }
 
-/**
- * Verifica si un rol tiene permiso usando el cache
- */
-function getPermissionFromCache(rol_id, metodo_nombre) {
-  const key = `${rol_id}-${metodo_nombre.toLowerCase()}`;
+function getPermissionFromCache(rol_id, llave) {
+  const key = `${rol_id}-${llave.toLowerCase()}`;
   return permissionMap.has(key);
 }
 
-/**
- * Verifica si el usuario tiene permiso para ejecutar el método
- */
-export async function verificarPermiso(usuario_id, metodo_nombre) {
-  const metodoRes = await db.query(
-    queries.metodos.getByName, // <-- Actualizado
-    [metodo_nombre]
-  );
-  const metodo = metodoRes.rows[0];
-  if (!metodo) throw new Error(`Método no encontrado: ${metodo_nombre}`);
+export async function verificarPermiso(usuarioId, llave) {
+  const queryRol = getQuery('getRolId');
+  const usuario = await db.query(queryRol, [usuarioId]);
+  const rol_id = usuario.rows[0]?.rol_id;
 
-  const usuarioRes = await db.query(
-    queries.usuarios.getRolById, // <-- Actualizado
-    [usuario_id]
-  );
-  const usuario = usuarioRes.rows[0];
-  if (!usuario) throw new Error(`Usuario no válido: ${usuario_id}`);
+  if (!rol_id) throw new Error(`Usuario no válido: ${usuarioId}`);
 
   if (permissionMap.size > 0) {
-    return getPermissionFromCache(usuario.rol_id, metodo.nombre);
+    return getPermissionFromCache(rol_id, llave);
   }
 
-  const permisoRes = await db.query(
-    queries.permisos.getPermisoDirecto, // <-- Actualizado
-    [usuario.rol_id, metodo.id]
-  );
-  const permiso = permisoRes.rows[0];
-  return permiso?.permitido === true;
-}
+  const queryPermiso = getQuery('getPermisoPorLlave');
+  const permiso = await db.query(queryPermiso, [rol_id, llave]);
 
-/**
- * Registra la transacción en la tabla tx
- */
-export async function registrarTransaccion(usuario_id, metodo_id, estado, detalle) {
-  await db.query(
-    queries.transacciones.insert, // <-- Actualizado
-    [usuario_id, metodo_id, estado, detalle]
-  );
-}
-
-/**
- * Audita accesos fallidos
- */
-export async function auditarAccesoFallido(usuario_id, metodo_nombre, motivo) {
-  const metodoRes = await db.query(
-    queries.metodos.getIdByName, // <-- Actualizado
-    [metodo_nombre]
-  );
-  const metodo = metodoRes.rows[0];
-  await registrarTransaccion(usuario_id, metodo?.id || null, 'denegado', motivo);
-}
-
-/**
- * Ejecuta el método de forma controlada
- */
-export async function ejecutarMetodoControlado(usuario_id, metodo_nombre, params, metodoEjecutable) {
-  const tienePermiso = await verificarPermiso(usuario_id, metodo_nombre);
-  
-  const metodoRes = await db.query(
-    queries.metodos.getIdByName, // <-- Actualizado
-    [metodo_nombre]
-  );
-  const metodo = metodoRes.rows[0];
-
-  if (!tienePermiso) {
-    await auditarAccesoFallido(usuario_id, metodo_nombre, 'Permiso denegado');
-    throw new Error('Acceso denegado');
-  }
-
-  try {
-    const resultado = await metodoEjecutable(params);
-    await registrarTransaccion(usuario_id, metodo.id, 'exitoso', 'Método ejecutado correctamente');
-    return resultado;
-  } catch (err) {
-    await registrarTransaccion(usuario_id, metodo.id, 'fallido', `Error: ${err.message}`);
-    throw err;
-  }
+  return permiso.rows[0]?.permitido === true;
 }

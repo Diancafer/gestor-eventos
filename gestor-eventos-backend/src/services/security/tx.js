@@ -1,24 +1,19 @@
 import db from '../../config/db.js';
-import queries from '../../config/queries.json' with { type: 'json' };
+import { getQuery } from '../../utils/queryLoader.js';
 
-export async function registrarTransaccion(usuarioId, nombreMetodo, estado, detalle = null) {
-  try {
-    const metodo = await db.query(
-      queries.metodos.getIdByName, // <-- Actualizado
-      [nombreMetodo]
-    );
-    const metodoId = metodo.rows[0]?.id;
+export async function registrarTransaccion(usuarioId, llave, estado, detalle = null, txId, metodoId) {
+  const query = getQuery('insertTxLog');
+  await db.query(query, [usuarioId, llave, txId, metodoId, estado, detalle]);
+}
 
-    if (!metodoId) {
-      console.warn(`Método no registrado: ${nombreMetodo}`);
-      return;
-    }
+export async function auditarAccesoFallido(usuarioId, llave, motivo) {
+  const resultadoTx = await db.query(getQuery('getTransaccionIdPorLlave'), [llave]);
+  const txId = resultadoTx.rows[0]?.id;
+  if (!txId) throw new Error(`Transacción no registrada para la llave: ${llave}`);
 
-    await db.query(
-      queries.transacciones.insert, // <-- Actualizado
-      [usuarioId, metodoId, estado, detalle]
-    );
-  } catch (error) {
-    console.error('Error al registrar transacción:', error.message);
-  }
+  const resultadoMetodo = await db.query(getQuery('getMetodoIdPorNombre'), [llave]); 
+  const metodoId = resultadoMetodo.rows[0]?.id;
+  if (!metodoId) throw new Error(`Método no registrado para la llave: ${llave}`);
+
+  await registrarTransaccion(usuarioId, llave, 'denegado', motivo, txId, metodoId);
 }

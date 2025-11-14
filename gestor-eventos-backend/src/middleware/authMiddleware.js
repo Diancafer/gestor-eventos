@@ -26,7 +26,7 @@ export const isAuthenticated = async (req, res, next) => {
     }
 
     const session = await getSession(token);
-    console.log('📡 Sesión obtenida:', session);
+    console.log(' Sesión obtenida:', session);
 
     if (!session) {
       return res.status(403).json({ message: 'Token inválido o expirado.' });

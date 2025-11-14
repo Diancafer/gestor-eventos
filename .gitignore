@@ -3,3 +3,4 @@ node_modules/
 
 # Ignorar archivos de entorno (contienen secretos)
 .env
+/generated/prisma
