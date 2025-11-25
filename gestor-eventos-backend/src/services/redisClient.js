@@ -15,7 +15,7 @@ let isConnected = false;
 
 export async function getRedisClient() {
   if (!isConnected) {
-    console.log('🔌 Intentando conectar a Redis...');
+    console.log('Intentando conectar a Redis...');
     try {
       await client.connect();
       isConnected = true;

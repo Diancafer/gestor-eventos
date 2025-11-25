@@ -1,0 +1,14 @@
+[33m50e5ec6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Versión con tx y llaves
+[33m3eb249f[m creacion de queries.json
+[33m17bd364[m base de datos actualizadas
+[33ma1a6611[m seguridad y objeto de sesion: gestion de permisos
+[33m4244a5f[m seguridad y objeto de negocio:validacion de permisos
+[33mb39a8f7[m Resolver conflictos de pull, añadir .gitignore y dejar de rastrear node_modules y .env
+[33ma32b5e8[m Fix: conexión segura a Redis y validación
+[33m44631a1[m Actualizacion blacklist con Redis
+[33meef109d[m Agregado  gestor_eventos.sql
+[33mb1d9223[m Actualización completa JWT y Session con roles
+[33m9908daa[m feat(auth): refactor verificación de correo y flujo de login - Ajustado auth.controller.js para manejar tokens ya consumidos - Mejorado authService.js para devolver usuario actualizado - Corregido emailService.js para usar ?token= en el link - Eliminado middleware obsoleto - Ajustado rutas y frontend (App, Login, VerifyAccount, AuthContext) para reflejar cambios
+[33m4a16126[m Actualización: backend + frontend integrados
+[33m7d87b83[m Primer commit del proyecto
+[33me0eac49[m first commit
