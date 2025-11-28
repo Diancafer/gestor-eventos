@@ -12,7 +12,7 @@ export default defineConfig({
   // =======================================================
   server: {
     // Fija el puerto del frontend a 5185.
-    port: 5185, 
+    port: 5173, 
     
     //  Si el puerto 5185 está ocupado, Vite mostrará un error
     // en lugar de buscar automáticamente el siguiente puerto libre.

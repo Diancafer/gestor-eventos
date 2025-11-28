@@ -40,3 +40,61 @@
 .read-the-docs {
   color: #888;
 }
+
+.form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.event-card, .payment-card {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-2);
+}
+
+/* Estilos de botones primarios */
+.primary-button {
+  background: var(--primary-color) !important;
+  color: var(--primary-color-text) !important;
+  border: none !important;
+  padding: 0.75rem 1.5rem !important;
+  transition: background-color 0.2s;
+}
+
+.primary-button:hover {
+  background: var(--primary-color-text) !important;
+  color: var(--primary-color) !important;
+  border: 1px solid var(--primary-color) !important;
+}
+
+/* Mensajes de feedback */
+.alert {
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.alert-error {
+  background-color: var(--red-100);
+  color: var(--red-900);
+  border: 1px solid var(--red-500);
+}
+
+.alert-success {
+  background-color: var(--green-100);
+  color: var(--green-900);
+  border: 1px solid var(--green-500);
+}
+
+/* Estilos de formulario */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.p-float-label label {
+  top: 0.8rem;
+}

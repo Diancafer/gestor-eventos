@@ -1,6 +1,9 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
+// La URL de tu backend debe ser la misma usada en los componentes: http://localhost:3000
+const BASE_URL = "http://localhost:3000/api/auth";
+
 const AuthContext = createContext(null);
 
 export const useAuth = () => {
@@ -16,23 +19,26 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Función de utilidad para resetear la sesión
   const resetAuthState = () => {
     localStorage.removeItem("token");
     setUser(null);
     setIsAuthenticated(false);
-    setLoading(false); // desbloquea la app
+    setLoading(false); 
   };
 
+  // Carga inicial y verificación de sesión
   useEffect(() => {
     const checkSession = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
         resetAuthState();
-        return setLoading(false); // evita bloqueo si no hay token
+        return; 
       }
 
       try {
-        const response = await axios.get("http://localhost:3000/api/auth/check-session", {
+        // Enviar el token en el header para que el backend lo valide
+        const response = await axios.get(`${BASE_URL}/check-session`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -40,6 +46,7 @@ export const AuthProvider = ({ children }) => {
         });
 
         if (response.data.logueado) {
+          // El backend devuelve { logueado: true, usuario: { id, email, rol_id, rol_nombre, nombre } }
           setUser(response.data.usuario);
           setIsAuthenticated(true);
         } else {
@@ -48,15 +55,16 @@ export const AuthProvider = ({ children }) => {
       } catch {
         resetAuthState();
       } finally {
-        setLoading(false); // asegura que loading termine
+        setLoading(false); 
       }
     };
 
     checkSession();
   }, []);
 
+  // Función de login (usada en Login.jsx)
   const login = async (email, password) => {
-    const response = await axios.post("http://localhost:3000/api/auth/login", {
+    const response = await axios.post(`${BASE_URL}/login`, {
       email,
       password,
     }, { withCredentials: true });
@@ -67,10 +75,11 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(true);
   };
 
+  // Función de logout (usada en App.jsx y en Login.jsx)
   const logout = async () => {
     const token = localStorage.getItem("token");
     try {
-      await axios.post("http://localhost:3000/api/auth/logout", null, {
+      await axios.post(`${BASE_URL}/logout`, null, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -82,17 +91,23 @@ export const AuthProvider = ({ children }) => {
       resetAuthState();
     }
   };
+  
+  // Función para obtener el ID del rol (usada en App.jsx para control de módulos)
+  const getRolId = () => user?.rol_id;
+  
+  // El valor del contexto
+  const value = {
+    user,
+    isAuthenticated,
+    loading,
+    login,
+    logout,
+    getRolId,
+  };
 
-  if (loading) {
-    return (
-      <div className="flex justify-content-center align-items-center min-h-screen">
-        Cargando aplicación...
-      </div>
-    );
-  }
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
