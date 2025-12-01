@@ -8,7 +8,7 @@ export default defineConfig({
   // =======================================================
   // sCONFIGURACIÓN PARA FIJAR EL PUERTO
   // Esto resuelve el problema de CORS, ya que el backend (server.js)
-  // está configurado para escuchar en http://localhost:5185.
+  // está configurado para escuchar en http://localhost:5173.
   // =======================================================
   server: {
     // Fija el puerto del frontend a 5185.
