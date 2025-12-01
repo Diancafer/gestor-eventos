@@ -1,8 +1,11 @@
 import db from '../config/db.js';
 import { getQuery } from '../utils/queryLoader.js';
-import { ObjetoNegocio } from './ObjetoNegocio.js';
 
-class VisualizarEventos extends ObjetoNegocio {
+class VisualizarEventos {
+  validar(datos) {
+    // Validaciones opcionales
+  }
+
   async ejecutar(usuarioId) {
     const query = getQuery('selectEventosActivos');
     const result = await db.query(query, ['cancelado']);

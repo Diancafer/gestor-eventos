@@ -1,9 +1,8 @@
 import db from '../config/db.js';
 import { getQuery } from '../utils/queryLoader.js';
 import { validarCampos } from '../utils/validator.js';
-import { ObjetoNegocio } from './ObjetoNegocio.js';
 
-class RegistrarAsistencia extends ObjetoNegocio {
+class RegistrarAsistencia {
   validar(datos) {
     validarCampos(['evento_id'], datos);
   }
