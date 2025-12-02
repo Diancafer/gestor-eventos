@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { getSession, isBlacklisted } from '../utils/Session.js';
-import { verificarPermiso } from '../services/security/security.js';
+import permissionService from '../services/security/security.js';
 
 // =======================================================
 // MIDDLEWARE DE AUTENTICACIÓN
