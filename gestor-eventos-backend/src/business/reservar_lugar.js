@@ -1,8 +1,8 @@
-import db from '../config/db.js';
+import DBComponent from '../config/db.js';
 import { getQuery } from '../utils/queryLoader.js';
 import { validarCampos } from '../utils/validator.js';
 
-class ReservarLugar {
+export default class ReservarLugar {
   validar(datos) {
     validarCampos(['evento_id'], datos);
   }
@@ -22,4 +22,3 @@ class ReservarLugar {
   }
 }
 
-export default new ReservarLugar();

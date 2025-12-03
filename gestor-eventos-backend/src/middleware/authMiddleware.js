@@ -1,10 +1,14 @@
 import jwt from 'jsonwebtoken';
-import { getSession, isBlacklisted } from '../utils/Session.js';
-import permissionService from '../services/security/security.js';
+import Session from '../utils/Session.js';
+import  PermissionService  from '../services/security/security.js';
 
-// =======================================================
+
+const session = new Session();
+const permissionService = new PermissionService();
+
+
 // MIDDLEWARE DE AUTENTICACIÓN
-// =======================================================
+
 export const isAuthenticated = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   console.log('Token recibido:', token);
@@ -18,21 +22,21 @@ export const isAuthenticated = async (req, res, next) => {
     console.log('Token decodificado:', decoded);
 
     const jti = decoded?.jti || token;
-    const blacklisted = await isBlacklisted(jti);
+    const blacklisted = await session.isBlacklisted(jti);
     console.log('¿Está en blacklist?', blacklisted);
 
     if (blacklisted) {
       return res.status(403).json({ message: 'Token revocado. Debes iniciar sesión nuevamente.' });
     }
 
-    const session = await getSession(token);
-    console.log(' Sesión obtenida:', session);
+    const currentSession = await session.getSession(token);
+    console.log('Sesión obtenida:', currentSession);
 
-    if (!session) {
+    if (!currentSession) {
       return res.status(403).json({ message: 'Token inválido o expirado.' });
     }
 
-    req.user = session; // contiene userId, rol, jti
+    req.user = currentSession; // contiene userId, rol, jti
     next();
   } catch (error) {
     console.error('Error en autenticación:', error);
@@ -40,12 +44,12 @@ export const isAuthenticated = async (req, res, next) => {
   }
 };
 
-// =======================================================
+
 // MIDDLEWARE DE AUTORIZACIÓN POR MÉTODO
-// =======================================================
+
 export const requireMetodo = (metodo_nombre) => {
   return async (req, res, next) => {
-    const usuario_id = req.user?.id;
+    const usuario_id = req.user?.userId; // ⚠️ usar userId del payload
     console.log(`Verificando permiso para método "${metodo_nombre}" del usuario ${usuario_id}`);
 
     if (!usuario_id) {
@@ -53,7 +57,7 @@ export const requireMetodo = (metodo_nombre) => {
     }
 
     try {
-      const tienePermiso = await verificarPermiso(usuario_id, metodo_nombre);
+      const tienePermiso = await permissionService.verificarPermiso(usuario_id, metodo_nombre);
       console.log(`¿Tiene permiso? ${tienePermiso}`);
 
       if (!tienePermiso) {

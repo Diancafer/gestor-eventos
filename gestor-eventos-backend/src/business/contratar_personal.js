@@ -1,8 +1,8 @@
-import db from '../config/db.js';
+import DBComponent from '../config/db.js';
 import { getQuery } from '../utils/queryLoader.js';
 import { validarCampos } from '../utils/validator.js';
 
-class ContratarPersonal {
+export default class ContratarPersonal {
   validar(datos) {
     validarCampos(['nombre', 'apellido', 'email', 'rol_id', 'empresa_id'], datos);
   }
@@ -18,4 +18,3 @@ class ContratarPersonal {
   }
 }
 
-export default new ContratarPersonal();

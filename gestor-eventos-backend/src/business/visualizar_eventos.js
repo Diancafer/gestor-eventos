@@ -1,9 +1,9 @@
-import db from '../config/db.js';
+import DBComponent from '../config/db.js';
 import { getQuery } from '../utils/queryLoader.js';
 
-class VisualizarEventos {
+export default class VisualizarEventos {
   validar(datos) {
-    // Validaciones opcionales
+  
   }
 
   async ejecutar(usuarioId) {
@@ -13,4 +13,3 @@ class VisualizarEventos {
   }
 }
 
-export default new VisualizarEventos();

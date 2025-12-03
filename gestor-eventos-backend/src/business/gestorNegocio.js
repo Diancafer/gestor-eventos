@@ -1,6 +1,6 @@
 import { TX } from './txKeys.js';
 
-export class gestorNegocio {
+export default class gestorNegocio {
   async ejecutarMetodo(usuarioId, nombreMetodo, datos = {}) {
     const metodoNormalizado = nombreMetodo.trim().toLowerCase();
 
@@ -35,4 +35,3 @@ export class gestorNegocio {
 
 }
 
-export default new gestorNegocio();

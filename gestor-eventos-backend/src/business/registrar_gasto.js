@@ -1,8 +1,8 @@
-import db from '../config/db.js';
+import DBComponent from '../config/db.js';
 import { getQuery } from '../utils/queryLoader.js';
 import { validarCampos } from '../utils/validator.js';
 
-class RegistrarGasto {
+export default class RegistrarGasto {
   validar(datos) {
     validarCampos(['descripcion', 'monto'], datos);
   }
@@ -14,4 +14,3 @@ class RegistrarGasto {
   }
 }
 
-export default new RegistrarGasto();

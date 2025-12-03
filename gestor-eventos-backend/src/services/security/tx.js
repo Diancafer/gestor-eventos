@@ -1,4 +1,4 @@
-import db from '../../config/db.js';
+import DBComponent from '../../config/db.js';
 import { getQuery } from '../../utils/queryLoader.js';
 
 class AuditService {

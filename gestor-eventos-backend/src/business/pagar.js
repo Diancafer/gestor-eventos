@@ -1,8 +1,8 @@
-import db from '../config/db.js';
+import DBComponent from '../config/db.js';
 import { getQuery } from '../utils/queryLoader.js';
 import { validarCampos } from '../utils/validator.js';
 
-class Pagar {
+export default class Pagar {
   validar(datos) {
     validarCampos(['monto', 'referencia'], datos);
   }
@@ -14,4 +14,3 @@ class Pagar {
   }
 }
 
-export default new Pagar();

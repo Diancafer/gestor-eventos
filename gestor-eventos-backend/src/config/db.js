@@ -1,39 +1,47 @@
-// src/config/db.js
-
 import pg from 'pg';
 import dotenv from 'dotenv';
 
-// Asegura que las variables del .env se carguen
 dotenv.config();
 
-// Configuración del Pool de Conexiones
-const pool = new pg.Pool({
-    user: process.env.PGUSER,
-    host: process.env.PGHOST,
-    database: process.env.PGDATABASE,
-    password: process.env.PGPASSWORD, 
-    port: process.env.PGPORT,
-    // [CORRECCIÓN] Eliminamos el bloque SSL que causaba: 
-    // "The server does not support SSL connections"
-});
-
-// Función de prueba de conexión al iniciar
-pool.connect()
-    .then(client => {
-        console.log(' Conexión exitosa a PostgreSQL!');
-        client.release();
-    })
-    .catch(err => {
-        console.error(' Error fatal al conectar a PostgreSQL. Verifique su base de datos y credenciales:', err.message);
+export default class  DBComponent {
+  constructor() {
+    this.pool = new pg.Pool({
+      user: process.env.PGUSER,
+      host: process.env.PGHOST,
+      database: process.env.PGDATABASE,
+      password: process.env.PGPASSWORD,
+      port: process.env.PGPORT,
     });
 
-// Objeto para manejar las queries y exponer el pool
-const db = {
-    // Función para ejecutar queries
-    query: (text, params) => pool.query(text, params),
-    
-    // Función para obtener el pool, útil para transacciones y connect-pg-simple
-    getPool: () => pool,
-};
+    this.testConnection();
+  }
 
-export default db;
+  async testConnection() {
+    try {
+      const client = await this.pool.connect();
+      console.log('Conexión exitosa a PostgreSQL');
+      client.release();
+    } catch (err) {
+      console.error('Error al conectar a PostgreSQL:', err.message);
+    }
+  }
+
+  async executeQuery(text, params) {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(text, params);
+      return res.rows;
+    } catch (error) {
+      console.error(error.message);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  getPool() {
+    return this.pool;
+  }
+}
+
+;

@@ -1,8 +1,8 @@
-import db from '../config/db.js';
+import DBComponent from '../config/db.js';
 import { getQuery } from '../utils/queryLoader.js';
 import { validarCampos } from '../utils/validator.js';
 
-class AsignarRoles {
+export default class AsignarRoles {
   validar(datos) {
     validarCampos(['usuario_target_id', 'nuevo_rol_id'], datos);
   }
@@ -15,4 +15,3 @@ class AsignarRoles {
   }
 }
 
-export default new AsignarRoles();

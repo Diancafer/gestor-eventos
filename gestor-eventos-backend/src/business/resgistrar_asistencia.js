@@ -1,8 +1,8 @@
-import db from '../config/db.js';
+import DBComponent from '../config/db.js';
 import { getQuery } from '../utils/queryLoader.js';
 import { validarCampos } from '../utils/validator.js';
 
-class RegistrarAsistencia {
+export default class RegistrarAsistencia {
   validar(datos) {
     validarCampos(['evento_id'], datos);
   }
@@ -21,4 +21,3 @@ class RegistrarAsistencia {
   }
 }
 
-export default new RegistrarAsistencia();

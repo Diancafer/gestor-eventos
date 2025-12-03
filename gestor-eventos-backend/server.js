@@ -3,15 +3,18 @@ import dotenv from 'dotenv';
 import cors from 'cors'; 
 import session from 'express-session';
 import pgSession from 'connect-pg-simple';
-import db from './src/config/db.js';
+import DBComponent from './src/config/db.js';
+import { Dispatcher } from './src/dispatcher/dispatcher.js';
 
 import authRoutes from './src/routes/auth.routes.js';
-import metodoRoutes from './src/routes/metodo.routes.js'; // IMPORTACIÓN FALTANTE
+import metodoroutes from './src/routes/metodo.routes.js';
+import gestorNegocio from './src/business/gestorNegocio.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 
 // =======================================================
 // CONFIGURACIÓN DE CORS
@@ -32,6 +35,8 @@ app.use(express.urlencoded({ extended: true }));
 // CONFIGURACIÓN DE SESIONES (PostgreSQL)
 // =======================================================
 const PgStore = pgSession(session);
+const db = new DBComponent();
+
 const sessionStore = new PgStore({
   pool: db.getPool(), 
   tableName: 'user_sessions',
@@ -52,19 +57,8 @@ app.use(
   })
 );
 
-// =======================================================
-// RUTAS
-// =======================================================
-app.use('/api/auth', authRoutes);
-app.use('/api', metodoRoutes); //MONTAJE DEL ROUTER DE MÉTODOS
 
-app.get('/', (req, res) => {
-  res.send('API de Gestor de Eventos corriendo.');
-});
 
-app.post('/api/test', (req, res) => {
-  res.json({ mensaje: 'Ruta /api/test activa' });
-});
 
 // =======================================================
 // INICIO DEL SERVIDOR
@@ -74,6 +68,9 @@ const startServer = () => {
     console.log(`Servidor Express corriendo en http://localhost:${PORT}`);
   });
 };
+// rutas
+ app.use('/api/auth', authRoutes);
+ app.use('/api', metodoroutes);
 
 db.getPool().query('SELECT 1')
   .then(() => {
@@ -84,3 +81,4 @@ db.getPool().query('SELECT 1')
     console.error('Error al conectar a PostgreSQL:', error.message);
     process.exit(1); 
   });
+ 

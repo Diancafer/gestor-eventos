@@ -1,10 +1,15 @@
-import * as authService from '../services/authService.js';
-import { createSession, getSession, destroy } from '../utils/Session.js';
-import db from '../config/db.js';
+import AuthService from '../services/authService.js';
+import Session from '../utils/Session.js';
+import DBComponent from '../config/db.js';
 
-// =======================================================
+
+const session = new Session();
+const authService = new AuthService();
+const db = new DBComponent();
+
+
 // REGISTRO
-// =======================================================
+
 export async function register(req, res) {
   try {
     const { nombre, apellido, email, password, nombre_empresa, rol_id } = req.body;
@@ -15,10 +20,9 @@ export async function register(req, res) {
   }
 }
 
-// =======================================================
+
 // VERIFICACIÓN DE CORREO
-// =======================================================
-export async function verifyEmail(req, res) {
+  export async function verifyEmail(req, res) {
   try {
     const { token } = req.query;
     const user = await authService.verifyEmailToken(token);
@@ -57,19 +61,19 @@ export async function verifyEmail(req, res) {
   }
 }
 
-// =======================================================
+
 // LOGIN
-// =======================================================
+
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
     const user = await authService.loginUser(email, password);
-
+    
     if (!user.correo_verificado) {
       return res.status(403).json({ message: 'Debes verificar tu correo antes de iniciar sesión.' });
     }
 
-    const token = await createSession(user);
+    const token = await session.createSession(user);
 
     res.cookie('token', token, {
       httpOnly: true,
@@ -91,15 +95,15 @@ export async function login(req, res) {
   }
 }
 
-// =======================================================
+
 // LOGOUT
-// =======================================================
+
 export async function logout(req, res) {
   try {
     const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(400).json({ message: 'Token no encontrado.' });
 
-    await destroy(token); //  ahora es async y revoca en Redis
+    await session.destroy(token); // ahora es async y revoca en Redis
     res.clearCookie('token');
     res.status(200).json({ message: 'Sesión cerrada correctamente.' });
   } catch {
@@ -107,9 +111,8 @@ export async function logout(req, res) {
   }
 }
 
-// =======================================================
 // OLVIDÉ CONTRASEÑA
-// =======================================================
+
 export async function forgotPassword(req, res) {
   try {
     const { email } = req.body;
@@ -120,9 +123,9 @@ export async function forgotPassword(req, res) {
   }
 }
 
-// =======================================================
+
 // RESETEAR CONTRASEÑA
-// =======================================================
+
 export async function resetPassword(req, res) {
   try {
     const { token, newPassword } = req.body;
@@ -133,18 +136,18 @@ export async function resetPassword(req, res) {
   }
 }
 
-// =======================================================
+
 // CHECK SESSION
-// =======================================================
+
 export async function checkSession(req, res) {
   try {
     const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ logueado: false });
 
-    const session = getSession(token);
-    if (!session) return res.status(401).json({ logueado: false });
+    const currentSession = await session.getSession(token);
+    if (!currentSession) return res.status(401).json({ logueado: false });
 
-    const user = await authService.getUserById(session.userId);
+    const user = await authService.getUserById(currentSession.userId);
     if (!user) return res.status(401).json({ logueado: false });
 
     res.status(200).json({ logueado: true, usuario: user });
@@ -153,9 +156,7 @@ export async function checkSession(req, res) {
   }
 }
 
-// =======================================================
-// PERFIL DEL USUARIO ACTUAL
-// =======================================================
+
 export async function getProfile(req, res) {
   try {
     const { userId, rol } = req.user;

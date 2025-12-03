@@ -1,7 +1,7 @@
-import db from '../config/db.js';
+import DBComponent from '../config/db.js';
 import { getQuery } from '../utils/queryLoader.js';
 
-class VisualizarPagos {
+export default class VisualizarPagos {
   validar(datos) {
   
   }
@@ -13,4 +13,3 @@ class VisualizarPagos {
   }
 }
 
-export default new VisualizarPagos();

@@ -1,7 +1,7 @@
-import db from '../config/db.js';
+import DBComponent from '../config/db.js';
 import { getQuery } from '../utils/queryLoader.js';
 
-class VisualizarReportes {
+export default class VisualizarReportes {
   validar(datos) {
   
   }
@@ -13,4 +13,3 @@ class VisualizarReportes {
   }
 }
 
-export default new VisualizarReportes();

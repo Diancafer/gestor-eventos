@@ -1,8 +1,8 @@
-import db from '../config/db.js';
+import DBComponent from '../config/db.js';
 import { getQuery } from '../utils/queryLoader.js';
 import { validarCampos } from '../utils/validator.js';
 
-class CrearEvento {
+export default class CrearEvento {
   validar(datos) {
     validarCampos(['titulo', 'fecha_inicio', 'fecha_fin', 'ubicacion', 'capacidad'], datos);
   }
@@ -17,4 +17,3 @@ class CrearEvento {
   }
 }
 
-export default new CrearEvento();
