@@ -63,15 +63,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Función de login (usada en Login.jsx)
-  const login = async (email, password) => {
-    const response = await axios.post(`${BASE_URL}/login`, {
-      email,
-      password,
-    }, { withCredentials: true });
-
-    const { token, usuario } = response.data;
-    localStorage.setItem("token", token);
-    setUser(usuario);
+  const login = (userData) => {
+    setUser(userData);
     setIsAuthenticated(true);
   };
 
