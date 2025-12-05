@@ -10,25 +10,25 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configuración de CORS para permitir peticiones desde el frontend
+
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true
 }));
 
-// Middleware para parsear JSON
+
 app.use(express.json());
 
-// Rutas principales
-app.use('/api/auth', authRoutes);
-app.use('/api', metodoRoutes); // INTEGRACIÓN DEL OBJETO DE NEGOCIO
 
-// Ruta de prueba
+app.use('/api/auth', authRoutes);
+app.use('/api', metodoRoutes); 
+
+
 app.get('/', (req, res) => {
   res.send('Backend activo y escuchando');
 });
 
-// Inicio del servidor y conexión a Redis
+
 (async () => {
   try {
     console.log('Intentando conectar a Redis...');
@@ -40,6 +40,6 @@ app.get('/', (req, res) => {
     });
   } catch (err) {
     console.error('Error al conectar Redis:', err);
-    process.exit(1); // opcional: detener si Redis falla
+    process.exit(1); 
   }
 })();

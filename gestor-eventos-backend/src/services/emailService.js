@@ -1,7 +1,7 @@
 import { transporter } from '../config/mailer.js';
 
 export async function sendVerificationEmail(email, token) {
-  //  query string en lugar de /:token
+ 
   const verificationLink = `${process.env.FRONTEND_URL}/verify?token=${token}`;
 
   const mailOptions = {

@@ -7,7 +7,7 @@ const session = new Session();
 const permissionService = new PermissionService();
 
 
-// MIDDLEWARE DE AUTENTICACIÓN
+
 
 export const isAuthenticated = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -45,7 +45,7 @@ export const isAuthenticated = async (req, res, next) => {
 };
 
 
-// MIDDLEWARE DE AUTORIZACIÓN POR MÉTODO
+
 
 export const requireMetodo = (metodo_nombre) => {
   return async (req, res, next) => {

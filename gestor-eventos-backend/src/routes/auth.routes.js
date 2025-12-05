@@ -15,31 +15,27 @@ import prisma from '../lib/prismaClient.js';
 
 const router = express.Router();
 
-// =======================================================
-// Rutas de Autenticación
-// =======================================================
 
-// Login y logout
-router.post('/login', login);                            // genera token
-router.post('/logout', isAuthenticated, logout);         // revoca token
+router.post('/login', login);                            
+router.post('/logout', isAuthenticated, logout);         
 
-// Registro y verificación
-router.post('/register', register);                      // requiere rol_id
-router.get('/verify', verifyEmail);                      // ?token=...
 
-// Estado de sesión y perfil
-router.get('/check-session', isAuthenticated, checkSession); // valida token
-router.get('/me', isAuthenticated, getProfile);               // perfil del usuario actual
+router.post('/register', register);                      
+router.get('/verify', verifyEmail);                     
 
-// Recuperación de contraseña
-router.post('/forgot-password', forgotPassword);         // envía enlace
-router.post('/reset-password', resetPassword);           // cambia contraseña
 
-// =======================================================
-// Rutas públicas para obtener datos auxiliares
-// =======================================================
+router.get('/check-session', isAuthenticated, checkSession); 
+router.get('/me', isAuthenticated, getProfile);               
 
-// Obtiene lista de roles disponibles
+
+router.post('/forgot-password', forgotPassword);         
+router.post('/reset-password', resetPassword);           
+
+
+
+
+
+
 router.get('/roles', async (req, res) => {
   try {
     const roles = await prisma.roles.findMany({
