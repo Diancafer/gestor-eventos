@@ -65,6 +65,7 @@ app.use(
 // =======================================================
 const startServer = () => {
   app.listen(PORT, () => {
+    
     console.log(`Servidor Express corriendo en http://localhost:${PORT}`);
   });
 };

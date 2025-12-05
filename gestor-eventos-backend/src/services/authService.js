@@ -72,7 +72,7 @@ export default class AuthService {
   async verifyEmailToken(token) {
     if (!token) throw new Error('Token de verificación requerido.');
 
-    const client = await db.getPool().connect();
+    const client = await this.db.getPool().connect();
     try {
       await client.query('BEGIN');
 

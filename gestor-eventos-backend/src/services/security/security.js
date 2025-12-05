@@ -3,14 +3,14 @@ import { getQuery } from '../../utils/queryLoader.js';
 
 export  default class PermissionService {
   constructor() {
-   
+    this.db = new DBComponent();
     this.permissionMap = new Map();
   }
 
   
   async loadAllPermissions() {
     const query = getQuery('loadAllPermissions');
-    const res = await db.query(query);
+    const res = await this.db.query(query);
     
    
     this.permissionMap.clear();
@@ -29,24 +29,22 @@ export  default class PermissionService {
   }
 
   
-  async verificarPermiso(usuarioId, llave) {
-    const queryRol = getQuery('getRolId');
-    const usuario = await db.query(queryRol, [usuarioId]);
-    const rol_id = usuario.rows[0]?.rol_id;
+ async verificarPermiso(userId, llave) {
+  const queryRol = getQuery('getRolId');
+  const usuario = await this.db.executeQuery(queryRol, [userId]);
+  const rol_id = usuario[0]?.rol_id;
 
-    if (!rol_id) throw new Error(`Usuario no válido: ${usuarioId}`);
+  if (!rol_id) throw new Error(`Usuario no válido: ${userId}`);
 
-    
-    if (this.permissionMap.size > 0) {
-      return this.getPermissionFromCache(rol_id, llave);
-    }
-
-    
-    const queryPermiso = getQuery('getPermisoPorLlave');
-    const permiso = await db.query(queryPermiso, [rol_id, llave]);
-
-    return permiso.rows[0]?.permitido === true;
+  if (this.permissionMap.size > 0) {
+    return this.getPermissionFromCache(rol_id, llave);
   }
+
+  const queryPermiso = getQuery('getPermisoPorLlave');
+  const permiso = await this.db.executeQuery(queryPermiso, [rol_id, llave]);
+
+  return permiso[0]?.permitido === true;
+}
 }
 
 

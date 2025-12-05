@@ -1,61 +1,33 @@
-import express from 'express';
-import { isAuthenticated } from '../middleware/authMiddleware.js';
-import gestorNegocio from '../business/gestorNegocio.js';
-import Session from '../utils/Session.js';
-import PermissionService from '../services/security/security.js';
-import { TX } from '../business/txKeys.js';
+import express from 'express'; import { isAuthenticated } from '../middleware/authMiddleware.js'; import GestorNegocio from '../business/gestorNegocio.js'; import Session from '../utils/Session.js'; import PermissionService from '../services/security/security.js'; import { TX } from '../business/txKeys.js';
+const router = express.Router(); const gestor = new GestorNegocio(); const session = new Session(); const permisos = new PermissionService();
+console.log('toProcess.routes.js cargado');
 
-const router = express.Router();
-console.log('metodo.routes.js cargado');
 
-class ToProcess {
-  constructor() {
-    this.session = new Session();
-    this.gestor = new gestorNegocio();
-    this.permisos = new PermissionService();
+router.post('/metodo', isAuthenticated, async (req, res) => { try { const { nombreMetodo, datos } = req.body; const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
+  if (!nombreMetodo || !datos) {
+  return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 
-  obtenerFTX(nombreMetodo) {
-    const llave = TX[nombreMetodo];
-    if (!llave) return null;
 
-    const [subsistema, objeto, metodo] = llave.split('.');
-    
-    return { subsistema,objeto, metodo, llave };
-  }
-
-  async ejecutar(req) {
-    const { nombreMetodo, datos } = req.body;
-    const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
-
-    if (!nombreMetodo || !datos) {
-      throw new Error('Faltan datos requeridos');
+    const sesionActiva = await session.getSession(token);
+    if (!sesionActiva || !sesionActiva.userId) {
+    return res.status(401).json({ error: 'Sesión inválida o expirada' });
     }
 
-    
 
-    const ftx = this.obtenerFTX(nombreMetodo);
-    if (!ftx) {
-      throw new Error(`Método ${nombreMetodo} no encontrado en el catálogo TX`);
-    }
-
-    const autorizado = await this.permisos.verificarPermiso(sesionActiva.usuarioId, ftx.llave);
-    if (!autorizado) {
-      throw new Error('Seguridad denegada: no tienes permiso para ejecutar este método');
-    }
-
-    const resultado = await this.gestor.ejecutarMetodo(nombreMetodo, datos);
-    return resultado;
+  const llave = TX[nombreMetodo];
+  if (!llave) {
+  return res.status(404).json({ error: `Método ${nombreMetodo} no encontrado en catálogo TX` });
   }
-}
 
-router.post('/metodo', isAuthenticated, async (req, res) => {
-  try {
-    const resultado = await new ToProcess().ejecutar(req);
-    res.json(resultado);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+
+  const autorizado = await permisos.verificarPermiso(sesionActiva.userId, llave);
+  if (!autorizado) {
+    return res.status(403).json({ error: 'Seguridad denegada: no tienes permiso para ejecutar este método' });
   }
-});
 
-export default router;
+  const resultado = await gestor.ejecutarMetodo(sesionActiva.userId, llave, datos);
+
+  return res.json(resultado);
+  } catch (error) { console.error('Error en ToProcess:', error); return res.status(500).json({ error: error.message }); } });
+  export default router;

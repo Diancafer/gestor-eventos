@@ -35,6 +35,12 @@ export class Dispatcher {
     this.app.post('/api/ejecutar', async (req, res) => {
         try {
             const {nombreMetodo, datos } = req.body;
+
+            const usuario = await this.authService.getUserById(sessionData.id);
+            if (!usuario) {
+                return res.status(404).json({ message: 'Usuario no encontrado.' }); }
+
+            req.usuario = usuario;
             const token = req.headers.authorization?.replace('Bearer ', '');
             if (!token) { return res.status(401).json({ message : 'No autorizado. Token faltante.' }); }
             
@@ -44,11 +50,6 @@ export class Dispatcher {
             const tienePermiso = await this.permissionService.verificarPermiso(sessionData.id, nombreMetodo);
             if (!tienePermiso) {
                 return res.status(403).json({ message: 'Acceso denegado. No tienes permiso para este método.' }); }
-                
-            const usuario = await this.authService.getUserById(sessionData.id);
-            if (!usuario) {
-                return res.status(404).json({ message: 'Usuario no encontrado.' }); }
-            req.usuario = usuario;
 
             const resultado = await this.gestorNegocio.ejecutarMetodo(sessionData.id, nombreMetodo, datos);
             res.json({ success: true, resultado });
@@ -58,5 +59,5 @@ export class Dispatcher {
         }
 
     });
- }              
+}              
 }
