@@ -87,7 +87,9 @@ export async function login(req, res) {
       usuario: {
         id: user.id,
         email: user.email,
-        rol: user.rol_id
+        rol_id: user.rol_id,       
+        nombre: user.nombre,      
+        rol_nombre: user.rol_nombre
       }
     });
   } catch (error) {
