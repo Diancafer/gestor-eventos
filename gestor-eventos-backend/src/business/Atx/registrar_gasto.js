@@ -4,6 +4,7 @@ import { getQuery } from '../../utils/queryLoader.js';
 import { validarCampos } from '../../utils/validator.js';
 
 const db = new DBComponent();
+
 const registrarGastoATX = {
   validar(datos) {
     validarCampos(['descripcion', 'monto'], datos);
@@ -18,11 +19,13 @@ const registrarGastoATX = {
       datos.evento_id
     ]);
 
-    if (result.rows.length === 0) {
+    
+    if (!result || result.length === 0) {
       throw new Error('No se pudo registrar el gasto');
     }
 
-    return { success: true, id: result.rows[0].id };
+ 
+    return { success: true, id: result[0].id };
   }
 };
 

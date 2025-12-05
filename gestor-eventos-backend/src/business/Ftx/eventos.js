@@ -21,7 +21,8 @@ export default class Eventos {
   }
 
   async visualizar_eventos(usuarioId, datos) {
-    visualizarEventosATX.validar(datos);
-    return await visualizarEventosATX.ejecutar(usuarioId, datos);
+  visualizarEventosATX.validar(datos);
+  const eventos = await visualizarEventosATX.ejecutar(usuarioId, datos);
+  return { success: true, eventos: Array.isArray(eventos) ? eventos : [] };
   }
 }

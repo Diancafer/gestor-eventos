@@ -3,8 +3,8 @@ import DBComponent from '../../config/db.js';
 import { getQuery } from '../../utils/queryLoader.js';
 import { validarCampos } from '../../utils/validator.js';
 
-
 const db = new DBComponent();
+
 const registrarAsistenciaATX = {
   validar(datos) {
     validarCampos(['evento_id'], datos);
@@ -14,7 +14,8 @@ const registrarAsistenciaATX = {
     const queryCheck = getQuery('selectRegistroEvento');
     const registro = await db.executeQuery(queryCheck, [datos.evento_id, usuarioId]);
 
-    if (registro.rowCount === 0) {
+  
+    if (!registro || registro.length === 0) {
       const queryInsert = getQuery('insertRegistroEvento');
       await db.executeQuery(queryInsert, [datos.evento_id, usuarioId]);
       return { success: true, mensaje: 'Asistencia registrada' };

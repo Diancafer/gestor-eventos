@@ -49,7 +49,7 @@ const CreateEventForm = () => {
 
     try {
       const response = await axios.post(API_URL, {
-        nombreMetodo: 'crear_evento', 
+        nombreMetodo: 'CREAR_EVENTO', 
         datos: { 
           ...formData,
           capacidad: capacidadNumerica
@@ -62,16 +62,16 @@ const CreateEventForm = () => {
       const data = response.data;
       
       if (data.success) {
-        setMensaje(`✅ Evento "${formData.titulo}" creado con éxito. ID: ${data.id}`);
+        setMensaje(` Evento "${formData.titulo}" creado con éxito. `);
         setIsSuccess(true);
         setFormData(initialFormData); 
       } else {
         const errorText = data.error || 'Error desconocido al crear el evento.';
-        setMensaje(`❌ Error: ${errorText}`);
+        setMensaje(` Error: ${errorText}`);
         setIsSuccess(false);
       }
     } catch (err) {
-      setMensaje(`❌ Error de red/servidor: ${err.response?.data?.error || err.message}`);
+      setMensaje(` Error de red/servidor: ${err.response?.data?.error || err.message}`);
       setIsSuccess(false);
     } finally {
       setLoading(false);

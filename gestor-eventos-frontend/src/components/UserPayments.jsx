@@ -22,7 +22,7 @@ const UserPayments = () => {
         if (!token) throw new Error('Token no disponible');
 
         const response = await axios.post(API_URL, {
-          nombreMetodo: 'visualizar_pagos', 
+          nombreMetodo: 'VISUALIZAR_PAGOS', 
           datos: {}, 
         }, {
           headers: { 'Authorization': `Bearer ${token}` },

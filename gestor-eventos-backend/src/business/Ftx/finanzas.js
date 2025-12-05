@@ -16,8 +16,8 @@ export default class Finanzas {
   }
 
   async registrar_gastos(usuarioId, datos) {
-    registrarGastosATX.validar(datos);
-    return await registrarGastosATX.ejecutar(usuarioId, datos);
+    registrarGastoATX.validar(datos);
+    return await registrarGastoATX.ejecutar(usuarioId, datos);
   }
 
   async visualizar_reportes(usuarioId, datos) {

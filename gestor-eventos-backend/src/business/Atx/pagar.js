@@ -12,17 +12,19 @@ const pagarATX = {
 
   async ejecutar(usuarioId, datos) {
     const query = getQuery('insertPago');
-    const result =await db.executeQuery(query, [
+    const result = await db.executeQuery(query, [
       datos.monto,
       datos.referencia,
       usuarioId
     ]);
 
-    if (result.rows.length === 0) {
+    
+    if (!result || result.length === 0) {
       throw new Error('No se pudo registrar el pago');
     }
 
-    return { success: true, id: result.rows[0].id };
+    
+    return { success: true, id: result[0].id };
   }
 };
 

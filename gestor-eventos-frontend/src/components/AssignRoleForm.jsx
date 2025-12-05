@@ -32,8 +32,9 @@ const AssignRoleForm = () => {
           value: rol.id,
         }));
         setRoles(opciones);
+    
       } catch (err) {
-        setMensaje('❌ Error al cargar la lista de roles.');
+        setMensaje(' Error al cargar la lista de roles.');
       } finally {
         setLoadingRoles(false);
       }
@@ -66,7 +67,7 @@ const AssignRoleForm = () => {
 
     try {
       const response = await axios.post(API_TX_URL, {
-        nombreMetodo: 'asignar_roles', 
+        nombreMetodo: 'ASIGNAR_ROLES', 
         datos: { 
           usuario_target_id,
           nuevo_rol_id,
@@ -79,16 +80,16 @@ const AssignRoleForm = () => {
       const data = response.data;
       
       if (data.success) {
-        setMensaje(`✅ Rol actualizado para el usuario ${usuario_target_id}.`);
+        setMensaje(` Rol actualizado para el usuario ${usuario_target_id}.`);
         setIsSuccess(true);
         setFormData(initialFormData); 
       } else {
         const errorText = data.error || 'Error desconocido al asignar el rol.';
-        setMensaje(`❌ Error: ${errorText}`);
+        setMensaje(` Error: ${errorText}`);
         setIsSuccess(false);
       }
     } catch (err) {
-      setMensaje(`❌ Error de red/servidor: ${err.response?.data?.error || err.message}`);
+      setMensaje(`Error de red/servidor: ${err.response?.data?.error || err.message}`);
       setIsSuccess(false);
     } finally {
       setLoading(false);

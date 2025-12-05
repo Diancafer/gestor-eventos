@@ -40,7 +40,7 @@ const PaymentForm = () => {
     
     const montoNumerico = parseFloat(formData.monto);
     if (isNaN(montoNumerico) || montoNumerico <= 0) {
-      setMensaje('❌ El monto debe ser un número positivo.');
+      setMensaje(' El monto debe ser un número positivo.');
       setIsSuccess(false);
       setLoading(false);
       return;
@@ -50,7 +50,7 @@ const PaymentForm = () => {
     
     try {
       const response = await axios.post(API_URL, {
-        nombreMetodo: 'pagar', 
+        nombreMetodo: 'PAGAR', 
         datos: { 
           monto: montoNumerico, 
           referencia: formData.referencia 
@@ -63,16 +63,16 @@ const PaymentForm = () => {
       const data = response.data;
       
       if (data.success) {
-        setMensaje(`✅ Pago por $${montoNumerico.toFixed(2)} registrado con éxito. ID de Pago: ${data.id}`);
+        setMensaje(` Pago por $${montoNumerico.toFixed(2)} registrado con éxito. ID de Pago: ${data.id}`);
         setIsSuccess(true);
         setFormData(initialFormData); 
       } else {
         const errorText = data.error || 'Error desconocido al procesar el pago.';
-        setMensaje(`❌ Error: ${errorText}`);
+        setMensaje(` Error: ${errorText}`);
         setIsSuccess(false);
       }
     } catch (err) {
-      setMensaje(`❌ Error de red/servidor: ${err.response?.data?.error || err.message}`);
+      setMensaje(` Error de red/servidor: ${err.response?.data?.error || err.message}`);
       setIsSuccess(false);
     } finally {
       setLoading(false);

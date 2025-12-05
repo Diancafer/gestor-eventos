@@ -5,7 +5,7 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { Card } from 'primereact/card';
 
 // URL de la API de transacciones
-const API_URL = 'http://localhost:3000/api/metodo'; 
+const API_URL = 'http://localhost:3000/api/metodo';
 
 const EventList = () => {
   const [eventos, setEventos] = useState([]);
@@ -24,16 +24,18 @@ const EventList = () => {
       if (!token) throw new Error('Token no disponible');
 
       const response = await axios.post(API_URL, {
-        nombreMetodo: 'visualizar_eventos', 
-        datos: {}, 
+        nombreMetodo: 'VISUALIZAR_EVENTOS',
+        datos: {},
       }, {
         headers: { 'Authorization': `Bearer ${token}` },
         withCredentials: true,
       });
 
-      if (response.data.success) {
-        setEventos(response.data.eventos);
+      const eventosRecibidos = response.data?.eventos;
+      if (response.data.success && Array.isArray(eventosRecibidos)) {
+        setEventos(eventosRecibidos);
       } else {
+        setEventos([]);
         setError(response.data.error || 'Error al cargar eventos.');
       }
     } catch (err) {
@@ -52,27 +54,28 @@ const EventList = () => {
     try {
       setMensajeTx(`Registrando en el evento ${evento_id}...`);
       const token = localStorage.getItem('token');
+      if (!token) throw new Error('Token no disponible');
 
       const response = await axios.post(API_URL, {
-        nombreMetodo: 'reservar_lugar',
+        nombreMetodo: 'RESERVAR_LUGAR',
         datos: { evento_id },
       }, {
         headers: { 'Authorization': `Bearer ${token}` },
         withCredentials: true,
       });
-      
+
       if (response.data.success) {
-        setMensajeTx(`✅ ${response.data.mensaje || 'Reserva confirmada'}`);
+        setMensajeTx(` ${response.data.mensaje || 'Reserva confirmada'}`);
       } else {
-        setMensajeTx(`❌ Error al registrar: ${response.data.error || 'Inténtelo de nuevo.'}`);
+        setMensajeTx(` Error al registrar: ${response.data.error || 'Inténtelo de nuevo.'}`);
       }
     } catch (err) {
-      setMensajeTx(`❌ Error de red/servidor: ${err.response?.data?.error || err.message}`);
+      setMensajeTx(` Error de red/servidor: ${err.response?.data?.error || err.message}`);
     }
   };
 
   if (loading) {
-    return <div className="text-center"><ProgressSpinner style={{width: '40px', height: '40px'}} /></div>;
+    return <div className="text-center"><ProgressSpinner style={{ width: '40px', height: '40px' }} /></div>;
   }
 
   if (error) {
@@ -81,9 +84,13 @@ const EventList = () => {
 
   return (
     <div className="event-list-container">
-      {mensajeTx && <div className={`alert ${mensajeTx.includes('❌') ? 'alert-error' : 'alert-success'}`}>{mensajeTx}</div>}
+      {mensajeTx && (
+        <div className={`alert ${mensajeTx.includes('❌') ? 'alert-error' : 'alert-success'}`}>
+          {mensajeTx}
+        </div>
+      )}
 
-      {eventos.length === 0 ? (
+      {Array.isArray(eventos) && eventos.length === 0 ? (
         <p>No hay eventos activos disponibles en este momento.</p>
       ) : (
         <div className="grid">
@@ -93,8 +100,8 @@ const EventList = () => {
                 <p><strong>Ubicación:</strong> {evento.ubicacion}</p>
                 <p><strong>Inicio:</strong> {new Date(evento.fecha_inicio).toLocaleDateString()}</p>
                 <p><strong>Capacidad:</strong> {evento.capacidad}</p>
-                
-                <Button 
+
+                <Button
                   label="Reservar Lugar"
                   icon="pi pi-ticket"
                   className="mt-3 p-button-sm primary-button"

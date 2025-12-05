@@ -33,7 +33,7 @@ const RegisterExpenseForm = () => {
     
     // Validaciones básicas
     if (!formData.monto || parseFloat(formData.monto) <= 0 || !formData.evento_id) {
-      setMensaje('❌ El monto y el ID del evento son requeridos y deben ser válidos.');
+      setMensaje(' El monto y el ID del evento son requeridos y deben ser válidos.');
       setIsSuccess(false);
       setLoading(false);
       return;
@@ -43,7 +43,7 @@ const RegisterExpenseForm = () => {
     
     try {
       const response = await axios.post(API_URL, {
-        nombreMetodo: 'registrar_gasto', 
+        nombreMetodo: 'REGISTRAR_GASTO', 
         datos: { 
           descripcion: formData.descripcion,
           monto: parseFloat(formData.monto), 
@@ -57,16 +57,16 @@ const RegisterExpenseForm = () => {
       const data = response.data;
       
       if (data.success) {
-        setMensaje(`✅ Gasto de $${parseFloat(formData.monto).toFixed(2)} registrado con éxito. ID: ${data.id}`);
+        setMensaje(` Gasto de $${parseFloat(formData.monto).toFixed(2)} registrado con éxito. ID: ${data.id}`);
         setIsSuccess(true);
         setFormData(initialFormData); 
       } else {
         const errorText = data.error || 'Error desconocido al registrar el gasto.';
-        setMensaje(`❌ Error: ${errorText}`);
+        setMensaje(` Error: ${errorText}`);
         setIsSuccess(false);
       }
     } catch (err) {
-      setMensaje(`❌ Error de red/servidor: ${err.response?.data?.error || err.message}`);
+      setMensaje(` Error de red/servidor: ${err.response?.data?.error || err.message}`);
       setIsSuccess(false);
     } finally {
       setLoading(false);
