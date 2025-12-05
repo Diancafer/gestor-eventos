@@ -29,13 +29,8 @@ const Login = () => {
         password
       });
 
-      // Guarda el token en localStorage
       localStorage.setItem('token', response.data.token);
-
-      // Actualiza el contexto global
       login(response.data.usuario);
-
-      // Redirige al dashboard
       navigate('/dashboard');
     } catch (err) {
       const msg = err.response?.data?.message || 'Error de conexión o credenciales inválidas.';
@@ -45,19 +40,21 @@ const Login = () => {
     }
   };
 
-  const cardTitle = (
-    <div className="text-center text-2xl font-bold">Inicio de Sesión</div>
-  );
-
   return (
-    <div className="flex justify-content-center align-items-center min-h-screen p-4 surface-ground">
-      <Card title={cardTitle} className="w-full md:w-25rem shadow-2">
-        <form onSubmit={handleSubmit} className="p-fluid">
-          {error && <Message severity="error" text={error} className="mb-3" />}
+    <div className="auth-background"> 
+      <Card className="auth-card w-full md:w-30rem p-4">
+        
+        <div className="text-center mb-5">
+            <div className="text-primary text-3xl font-bold mb-2">GestorEventos</div>
+            <span className="text-600 font-medium">Inicia sesión para continuar</span>
+        </div>
 
-          {/* Campo Email */}
-          <div className="field mb-3">
-            <span className="p-float-label">
+        <form onSubmit={handleSubmit} className="p-fluid">
+          {error && <Message severity="error" text={error} className="mb-4 w-full" />}
+
+          <div className="field mb-4">
+            <span className="p-float-label p-input-icon-left">
+              <i className="pi pi-envelope" />
               <InputText
                 id="email"
                 type="email"
@@ -65,14 +62,15 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
                 required
+                className="p-inputtext-lg"
               />
               <label htmlFor="email">Correo Electrónico</label>
             </span>
           </div>
 
-          {/* Campo Contraseña */}
-          <div className="field mb-2">
-            <span className="p-float-label">
+          <div className="field mb-4">
+            <span className="p-float-label p-input-icon-left">
+              <i className="pi pi-lock" />
               <InputText
                 id="password"
                 type="password"
@@ -80,16 +78,16 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
                 required
+                className="p-inputtext-lg"
               />
               <label htmlFor="password">Contraseña</label>
             </span>
           </div>
 
-          {/* Enlace de recuperación */}
-          <div className="text-right mb-4">
-            <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-              ¿Olvidaste tu contraseña?
-            </Link>
+          <div className="flex align-items-center justify-content-between mb-5">
+             <Link to="/forgot-password" class="font-medium no-underline ml-2 text-blue-500 text-right cursor-pointer">
+                 ¿Olvidaste tu contraseña?
+             </Link>
           </div>
 
           <Button
@@ -97,18 +95,19 @@ const Login = () => {
             label="Entrar"
             icon="pi pi-sign-in"
             loading={loading}
-            className="w-full p-button-success"
+            className="w-full p-button-lg"
           />
         </form>
 
         <Divider align="center" className="my-4">
-          <span className="p-tag">O</span>
+          <span className="text-600 font-normal text-sm">O</span>
         </Divider>
 
         <div className="text-center">
-          <Link to="/register" className="text-primary hover:underline">
-            ¿No tienes cuenta? Regístrate aquí
-          </Link>
+            <span className="text-600 font-medium line-height-3">¿No tienes cuenta?</span>
+            <Link to="/register" className="font-medium no-underline ml-2 text-blue-500 cursor-pointer">
+                Regístrate aquí
+            </Link>
         </div>
       </Card>
     </div>
